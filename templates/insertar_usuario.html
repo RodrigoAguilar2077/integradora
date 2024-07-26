@@ -1,0 +1,49 @@
+{% extends 'bootstrap/base.html' %}
+{% block head %}
+    {{ super() }}
+    <title>
+        {% block title %}
+            Sags Web App - Insertar Nuevo Producto
+        {% endblock %}
+    </title>
+    <link rel="stylesheet" href="../static/assets/style/style.css">
+{% endblock %}
+
+
+{% block content %}
+<div class="container-md">
+    <div class="form-container">
+        <h2>Agregar nuevo producto</h2>
+        <form action="{{ url_for('insertar_producto') }}" method="post">
+            {{ form.hidden_tag() }}
+            <div class="form-group">
+                {{ form.nombre.label(class="form-control-label") }}
+                {{ form.nombre(class="form-control") }}
+            </div>
+            <div class="form-group">
+                {{ form.apellido_paterno.label(class="form-control-label") }}
+                {{ form.apellido_paterno(class="form-control") }}
+            </div>
+            <div class="form-group">
+                {{ form.apellido_materno.label(class="form-control-label") }}
+                {{ form.apellido_materno(class="form-control") }}
+            </div>
+            <div class="form-group">
+                {{ form.tipo_usuario.label(class="form-control-label") }}
+                {{ form.tipo_usuario(class="form-control") }}
+            </div>
+            <div class="form-group">
+                {{ form.nombre_de_usuario.label(class="form-control-label") }}
+                {{ form.nombre_de_usuario(class="form-control") }}
+            </div>
+            <div class="form-group">
+                {{ form.contraseña.label(class="form-control-label") }}
+                {{ form.contraseña(class="form-control") }}
+            </div>
+            <div class="form-group text-center">
+                {{ form.submit(class="btn btn-primary btn-block") }}
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,45 @@
+{% extends 'bootstrap/base.html' %}
+{% block head %}
+    {{ super() }}
+    <title>
+        {% block title %}
+            Biblioteca Web App
+        {% endblock %}
+    </title>
+    <link rel="stylesheet" href="../static/assets/style/style.css">
+{% endblock %}
+
+{% block body %}
+
+    {% block navbar %}
+        {% include 'navbar.html' %}
+    {% endblock %}
+
+    {% block content %}
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-md-12">
+            <table class="table table-bordered table-hover table-sm">
+                <thead class="thead-dark">
+                    <tr>
+                        <th scope="col">Id. Bodega</th>
+                        <th scope="col">Nombre de bodega</th>
+                        <th scope="col">Ubicaion de la bodega</th>
+                    </tr>
+                </thead>
+                <tbody>
+                        {% for autor in datos %}
+                    <tr>
+                        <td>{{ autor[0] }}</td>
+                        <td>{{ autor[1] }}</td>
+                        <td>{{ autor[2] }}</td>
+                    </tr>
+            {% endfor %}
+                </tbody>
+            </table>
+            </div>
+        </div>
+    </div>
+    {% endblock %}
+{% endblock %}
+
