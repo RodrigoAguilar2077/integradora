@@ -1,0 +1,62 @@
+{% extends 'bootstrap/base.html' %}
+{% block head %}
+    {{ super() }}
+    <title>
+        {% block title %}
+            Editar Producto
+        {% endblock %}
+    </title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='assets/style/style.css') }}">
+{% endblock %}
+
+{% block body %}
+    {% block navbar %}
+        {% include 'navbar.html' %}
+    {% endblock %}
+
+    <div class="main-content">
+        {% block content %}
+        <div class="container mt-4">
+            <h2>Editar Producto</h2>
+            <form action="{{ url_for('editar_producto') }}" method="post">
+                <input type="hidden" name="original_id_producto" value="{{ id_producto }}">
+                
+                <div class="mb-3">
+                    <label for="nombre_producto" class="form-label">Nombre del Producto</label>
+                    <input type="text" name="nombre_producto" class="form-control" value="{{ nombre_producto }}" required>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="cantidad" class="form-label">Cantidad</label>
+                    <input type="text" name="cantidad" class="form-control" value="{{ cantidad }}" required>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="presentacion" class="form-label">Presentación</label>
+                    <input type="text" name="presentacion" class="form-control" value="{{ presentacion }}" required>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="nombre_bodega" class="form-label">Nombre de la Bodega</label>
+                    <input type="text" name="nombre_bodega" class="form-control" value="{{ nombre_bodega }}" required>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="nombre_proveedor" class="form-label">Nombre del Proveedor</label>
+                    <input type="text" name="nombre_proveedor" class="form-control" value="{{ nombre_proveedor }}" required>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="categoria" class="form-label">Categoría</label>
+                    <input type="text" name="categoria" class="form-control" value="{{ categoria }}" required>
+                </div>
+                
+                <div class="d-flex justify-content-between">
+                    <button type="submit" class="btn btn-primary">Actualizar</button>
+                    <a href="{{ url_for('productos') }}" class="btn btn-secondary">Cancelar</a>
+                </div>
+            </form>
+        </div>
+        {% endblock %}
+    </div>
+{% endblock %}

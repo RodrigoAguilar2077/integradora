@@ -6,7 +6,7 @@
             Tienda SAGS
         {% endblock %}
     </title>
-    <link rel="stylesheet" href="../static/assets/style/style.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='assets/style/style.css') }}">
 {% endblock %}
 
 {% block body %}
@@ -14,20 +14,22 @@
         {% include 'navbar.html' %}
     {% endblock %}
 
-    {% block content %}
-    <div class="container mt-4">
-        <div class="row">
-            <div class="col-md-12">
+    <div class="main-content">
+        {% block content %}
+        <div class="container mt-4">
+            <h2>Lista de Productos</h2>
+            <div class="table-responsive">
                 <table class="table table-bordered table-hover table-sm">
                     <thead class="thead-dark">
                         <tr>
-                            <th scope="col">ID_producto</th>
-                            <th scope="col">Nombre del producto</th>
-                            <th scope="col">Existencia</th>
+                            <th scope="col">ID Producto</th>
+                            <th scope="col">Nombre del Producto</th>
+                            <th scope="col">Cantidad</th>
                             <th scope="col">Presentación</th>
-                            <th scope="col">Categoria</th>
-                            <th scope="col">Nombre del proveedor</th>
-                            <th scope="col">Marca</th>
+                            <th scope="col">Nombre de la Bodega</th>
+                            <th scope="col">Nombre del Proveedor</th>
+                            <th scope="col">Categoría</th>
+                            <th scope="col">Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -40,16 +42,20 @@
                             <td>{{ fila[4] }}</td>
                             <td>{{ fila[5] }}</td>
                             <td>{{ fila[6] }}</td>
+                            <td>
+                                <a href="{{ url_for('editar_producto', id_producto=fila[0], nombre_producto=fila[1], cantidad=fila[2], presentacion=fila[3], nombre_bodega=fila[4], nombre_proveedor=fila[5], categoria=fila[6]) }}" class="btn btn-primary btn-sm">Editar</a>
+                                <form action="{{ url_for('eliminar_producto') }}" method="post" style="display:inline;">
+                                    <input type="hidden" name="id_producto" value="{{ fila[0] }}">
+                                    <input type="submit" value="Eliminar" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de que quieres eliminar este producto?');">
+                                </form>
+                            </td>
                         </tr>
                         {% endfor %}
                     </tbody>
                 </table>
             </div>
         </div>
+        {% endblock %}
     </div>
-    {% endblock %}
 {% endblock %}
-
-
-
 

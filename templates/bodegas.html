@@ -3,43 +3,50 @@
     {{ super() }}
     <title>
         {% block title %}
-            Biblioteca Web App
+            Tienda SAGS - Bodegas
         {% endblock %}
     </title>
-    <link rel="stylesheet" href="../static/assets/style/style.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='assets/style/style.css') }}">
 {% endblock %}
 
 {% block body %}
-
     {% block navbar %}
         {% include 'navbar.html' %}
     {% endblock %}
 
-    {% block content %}
-    <div class="container mt-4">
-        <div class="row">
-            <div class="col-md-12">
-            <table class="table table-bordered table-hover table-sm">
-                <thead class="thead-dark">
-                    <tr>
-                        <th scope="col">Id. Bodega</th>
-                        <th scope="col">Nombre de bodega</th>
-                        <th scope="col">Ubicaion de la bodega</th>
-                    </tr>
-                </thead>
-                <tbody>
-                        {% for autor in datos %}
-                    <tr>
-                        <td>{{ autor[0] }}</td>
-                        <td>{{ autor[1] }}</td>
-                        <td>{{ autor[2] }}</td>
-                    </tr>
-            {% endfor %}
-                </tbody>
-            </table>
+    <div class="main-content">
+        {% block content %}
+        <div class="container mt-4">
+            <h2>Bodegas</h2>
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover table-sm">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th scope="col">ID Bodega</th>
+                            <th scope="col">Nombre de Bodega</th>
+                            <th scope="col">Ubicación</th>
+                            <th scope="col">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for bodega in datos %}
+                        <tr>
+                            <td>{{ bodega[0] }}</td>
+                            <td>{{ bodega[1] }}</td>
+                            <td>{{ bodega[2] }}</td>
+                            <td>
+                                <a href="{{ url_for('editar_bodega', id_bodega=bodega[0], nombre_bodega=bodega[1], ubicacion=bodega[2]) }}" class="btn btn-primary btn-sm">Editar</a>
+                                <form action="{{ url_for('eliminar_bodega') }}" method="post" style="display:inline;">
+                                    <input type="hidden" name="id_bodega" value="{{ bodega[0] }}">
+                                    <input type="submit" value="Eliminar" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de que quieres eliminar esta bodega?');">
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
         </div>
+        {% endblock %}
     </div>
-    {% endblock %}
 {% endblock %}
-

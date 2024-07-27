@@ -1,0 +1,37 @@
+{% extends 'bootstrap/base.html' %}
+{% block head %}
+    {{ super() }}
+    <title>
+        {% block title %}
+            Editar Bodega
+        {% endblock %}
+    </title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='assets/style/style.css') }}">
+{% endblock %}
+
+{% block body %}
+    {% block navbar %}
+        {% include 'navbar.html' %}
+    {% endblock %}
+
+    <div class="main-content">
+        {% block content %}
+        <div class="container mt-4">
+            <h2>Editar Bodega</h2>
+            <form action="{{ url_for('editar_bodega') }}" method="post">
+                <input type="hidden" name="original_id_bodega" value="{{ id_bodega }}">
+                <div class="mb-3">
+                    <label for="nombre_bodega" class="form-label">Nombre de la Bodega</label>
+                    <input type="text" name="nombre_bodega" class="form-control" value="{{ nombre_bodega }}" required>
+                </div>
+                <div class="mb-3">
+                    <label for="ubicacion" class="form-label">Ubicación de la Bodega</label>
+                    <input type="text" name="ubicacion" class="form-control" value="{{ ubicacion }}" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Actualizar</button>
+                <a href="{{ url_for('bodegas') }}" class="btn btn-secondary">Cancelar</a>
+            </form>
+        </div>
+        {% endblock %}
+    </div>
+{% endblock %}

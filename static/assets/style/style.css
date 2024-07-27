@@ -14,7 +14,8 @@
 
 .mi-nav .navbar-brand,
 .mi-nav .nav-link {
-    color: #ffffff; /* Color del texto personalizado */
+    color: #ffffff;
+    text-decoration: none; /* Color del texto personalizado */
 }
 
 .mi-nav .nav-link.active {
@@ -30,6 +31,8 @@ body {
     background-color: #f8f9fa;
     position: relative;
     z-index: 1;
+    display: flex;
+    flex-direction: column; /* Mantiene el flujo vertical para el contenido */
 }
 
 body::before {
@@ -96,4 +99,69 @@ h1 {
 p.lead {
     color: #6c757d;
     font-size: 1.25rem;
+}
+
+/* Estilos de los botones */
+.btn {
+    padding: 5px 10px;
+    border-radius: 5px;
+    text-decoration: none;
+    color: #fff;
+    display: inline-block;
+    transition: background-color 0.3s;
+}
+
+.btn-primary {
+    background-color: #007bff;
+}
+
+.btn-primary:hover {
+    background-color: #0056b3;
+}
+
+.btn-danger {
+    background-color: #dc3545;
+}
+
+.btn-danger:hover {
+    background-color: #c82333;
+}
+
+.btn-secondary {
+    background-color: #6c757d;
+    border: none;
+}
+
+.btn-secondary:hover {
+    background-color: #5a6268;
+}
+
+/* Estilos adicionales para el formulario de edición de usuario */
+.form-label {
+    font-weight: bold;
+}
+
+.container .form-label {
+    font-weight: bold;
+}
+
+.container .row {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.container .row .col-md-6 {
+    flex: 0 0 50%;
+    max-width: 50%;
+    padding: 15px;
+}
+
+.container .row .col-md-6 .form-control {
+    width: 100%;
+}
+
+.container .d-flex {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
 }
