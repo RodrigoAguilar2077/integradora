@@ -45,12 +45,12 @@ def insertar_usuario():
         apellido_materno = form.apellido_materno.data
         tipo_usuario = form.tipo_usuario.data
         nombre_de_usuario = form.nombre_de_usuario.data
-        contraseña = form.contraseña.data  # Corrección aquí
+        contraseña = form.contraseña.data
         
         conn = db.conectar()
         cursor = conn.cursor()
         cursor.execute('''
-        INSERT INTO libro (nombre, apellido_paterno, apellido_materno, tipo_usuario, nombre_de_usuario, contraseña)
+        INSERT INTO vista_usuarios (nombre, apellido_paterno, apellido_materno, tipo_usuario, nombre_de_usuario, contraseña)
         VALUES (%s, %s, %s, %s, %s, %s)
         ''', (nombre, apellido_paterno, apellido_materno, tipo_usuario, nombre_de_usuario, contraseña))
         conn.commit()
@@ -58,12 +58,10 @@ def insertar_usuario():
         db.desconectar(conn)
         
         flash('Usuario añadido correctamente')
-        return redirect(url_for('usuarios'))
+        return redirect(url_for('usuarios'))  # Corrige el nombre de la función para redirigir
 
     return render_template('insertar_usuario.html', form=form)
 
-
-    return render_template('insertar_producto.html', form=form)
 
 @app.route('/eliminar_usuario', methods=['POST'])
 def eliminar_usuario():
@@ -242,24 +240,44 @@ def eliminar_producto():
 @app.route('/insertar_producto', methods=['GET', 'POST'])
 def insertar_producto():
     form = Sags2Form()
+
+    # Recupera los IDs y nombres de proveedores y bodegas de la base de datos
+    conn = db.conectar()
+    cursor = conn.cursor()
+    
+    # Obtener proveedores
+    cursor.execute("SELECT id_proveedor, nombre_proveedor FROM proveedores")
+    proveedores = cursor.fetchall()
+    form.fk_proveedores.choices = [(proveedor[0], proveedor[1]) for proveedor in proveedores]
+
+    # Obtener bodegas
+    cursor.execute("SELECT id_bodega, nombre_bodega FROM bodega")
+    bodegas = cursor.fetchall()
+    form.fk_bodega.choices = [(bodega[0], bodega[1]) for bodega in bodegas]
+    
+    cursor.close()
+    db.desconectar(conn)
+
     if form.validate_on_submit():
-        nombre_producto = form.nombre_producto.data
-        cantidad=form.cantidad.data
-        presentacion=form.presentacin.data
-        fk_proveedor = form.fk_proveedor.data  # Cambio aquí
+        nombre = form.nombre.data
+        cantidad = form.cantidad.data
+        presentación = form.presentación.data
+        fk_proveedores = form.fk_proveedores.data
         fk_bodega = form.fk_bodega.data
+        
         conn = db.conectar()
         cursor = conn.cursor()
         cursor.execute('''
-        INSERT INTO libro (nombre_producto, cantidad, presentacion, fk_proveedor, fk_bodega)
-                     VALUES (%s, %s, %s, %s, %s)
-        ''', (nombre_producto, cantidad, presentacion, fk_proveedor, fk_bodega))
+        INSERT INTO productos (nombre, cantidad, presentación, fk_proveedores, fk_bodega)
+        VALUES (%s, %s, %s, %s, %s)
+        ''', (nombre, cantidad, presentación, fk_proveedores, fk_bodega))
         conn.commit()
         cursor.close()
-        db.desconectar(conn)  # Cambio aquí
-        flash('LIBRO AÑADIDO CORRECTAMENTE')
-        return redirect(url_for('productos'))  # Corrige el nombre de la función para redirigir
-
+        db.desconectar(conn)
+        
+        flash('Producto añadido correctamente')
+        return redirect(url_for('productos'))  # Asegúrate de que 'productos' sea una función válida
+    
     return render_template('insertar_producto.html', form=form)
 
 @app.route('/bodegas')

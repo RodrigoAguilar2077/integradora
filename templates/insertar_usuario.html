@@ -3,18 +3,18 @@
     {{ super() }}
     <title>
         {% block title %}
-            Sags Web App - Insertar Nuevo Producto
+            Sags Web App - Insertar Nuevo Usuario
         {% endblock %}
     </title>
     <link rel="stylesheet" href="../static/assets/style/style.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 {% endblock %}
-
 
 {% block content %}
 <div class="container-md">
     <div class="form-container">
-        <h2>Agregar nuevo producto</h2>
-        <form action="{{ url_for('insertar_producto') }}" method="post">
+        <h2>Agregar nuevo usuario</h2>
+        <form action="{{ url_for('insertar_usuario') }}" method="post">
             {{ form.hidden_tag() }}
             <div class="form-group">
                 {{ form.nombre.label(class="form-control-label") }}

@@ -7,8 +7,8 @@
         {% endblock %}
     </title>
     <link rel="stylesheet" href="../static/assets/style/style.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 {% endblock %}
-
 
 {% block content %}
 <div class="container-md">
@@ -17,20 +17,20 @@
         <form action="{{ url_for('insertar_producto') }}" method="post">
             {{ form.hidden_tag() }}
             <div class="form-group">
-                {{ form.nombre_producto.label(class="form-control-label") }}
-                {{ form.nombre_producto(class="form-control") }}
+                {{ form.nombre.label(class="form-control-label") }}
+                {{ form.nombre(class="form-control") }}
             </div>
             <div class="form-group">
                 {{ form.cantidad.label(class="form-control-label") }}
-                {{ form.canridad(class="form-control") }}
+                {{ form.cantidad(class="form-control") }}
             </div>
             <div class="form-group">
-                {{ form.presentacion.label(class="form-control-label") }}
-                {{ form.presentacion(class="form-control") }}
+                {{ form.presentación.label(class="form-control-label") }}
+                {{ form.presentación(class="form-control") }}
             </div>
             <div class="form-group">
-                {{ form.proveedor.label(class="form-control-label") }}
-                {{ form.proveedor(class="form-control") }}
+                {{ form.fk_proveedores.label(class="form-control-label") }}
+                {{ form.fk_proveedores(class="form-control") }}
             </div>
             <div class="form-group">
                 {{ form.fk_bodega.label(class="form-control-label") }}
