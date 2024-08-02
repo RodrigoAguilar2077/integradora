@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./assets/style.css">
+    <title>Logout - Starlord2077</title>
+</head>
+<body class="logout-body">
+    <nav class="mi-nav">
+        <a class="navbar-brand" href="{{ url_for('dashboard') }}">Starlord2077</a>
+        <ul class="navbar-nav">
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('dashboard') }}">Inicio</a>
+            </li>
+        </ul>
+    </nav>
+    <section class="logout-section">
+        <h1 class="logout-h1">Has cerrado sesión</h1>
+        <p class="logout-text">Gracias por usar nuestra aplicación. Serás redirigido a la página de inicio de sesión en breve.</p>
+        <p class="logout-text">Si no eres redirigido automáticamente, <a href="{{ url_for('login') }}">haz clic aquí</a> para ir al inicio de sesión.</p>
+    </section>
+    <script>
+        // Redirige automáticamente después de 3 segundos
+        setTimeout(function() {
+            window.location.href = "{{ url_for('login') }}";
+        }, 3000);
+    </script>
+</body>
+</html>

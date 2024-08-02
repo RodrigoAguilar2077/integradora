@@ -1,0 +1,63 @@
+{% extends 'bootstrap/base.html' %}
+{% block head %}
+    {{ super() }}
+    <title>
+        {% block title %}
+            Sags Web App - Buscar Productos
+        {% endblock %}
+    </title>
+    <link rel="stylesheet" href="../static/assets/style/style.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+{% endblock %}
+
+{% block content %}
+<div class="container-md">
+    <div class="form-container">
+        <h2>Buscar productos</h2>
+        <form action="{{ url_for('buscar_productos') }}" method="post">
+            {{ form.hidden_tag() }}
+            <div class="form-group">
+                {{ form.bodega.label(class="form-control-label") }}
+                {{ form.bodega(class="form-control") }}
+            </div>
+            <div class="form-group">
+                {{ form.categoria.label(class="form-control-label") }}
+                {{ form.categoria(class="form-control") }}
+            </div>
+            <div class="form-group text-center">
+                {{ form.submit(class="btn btn-primary btn-block") }}
+            </div>
+        </form>
+    </div>
+</div>
+
+{% if productos %}
+    <div class="container-md">
+        <h3>Resultados de la búsqueda</h3>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Cantidad</th>
+                    <th>Presentación</th>
+                    <th>Bodega</th>
+                    <th>Categoría</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for producto in productos %}
+                    <tr>
+                        <td>{{ producto[0] }}</td>
+                        <td>{{ producto[1] }}</td>
+                        <td>{{ producto[2] }}</td>
+                        <td>{{ producto[3] }}</td>
+                        <td>{{ producto[4] }}</td>
+                        <td>{{ producto[5] }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endif %}
+{% endblock %}

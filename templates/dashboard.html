@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./assets/style.css">
+    <title>Dashboard - Starlord2077</title>
+</head>
+<body class="dashboard-body">
+    <nav class="mi-nav">
+        <a class="navbar-brand" href="{{ url_for('dashboard') }}">Starlord2077</a>
+        <ul class="navbar-nav">
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('dashboard') }}">Inicio</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('logout') }}">Cerrar sesión</a>
+            </li>
+        </ul>
+    </nav>
+    <section class="dashboard-section">
+        <h1 class="dashboard-h1">Bienvenido, {{ username }}!</h1>
+        <p class="dashboard-text">¡Has iniciado sesión exitosamente!</p>
+        <!-- Aquí puedes añadir más contenido o funcionalidades para tu dashboard -->
+    </section>
+</body>
+</html>

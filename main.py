@@ -6,12 +6,12 @@ from wtforms.fields import PasswordField, StringField, SubmitField
 import db
 from forms import Sags1Form
 from forms import Sags2Form
+from forms import SearchForm
 
 app = Flask(__name__)
 bootstrap = Bootstrap(app)
 app.config['SECRET_KEY']= 'SUPER SECRETO'
 # csrf = CSRFProtect(app)
-
 
 @app.route('/')
 def index():
@@ -114,7 +114,7 @@ def editar_usuario():
             conn = db.conectar()
             cursor = conn.cursor()
             cursor.execute('''
-                UPDATE vista_usuarios 
+                UPDATE vista_usuarios
                 SET nombre = %s, apellido_paterno = %s, apellido_materno = %s, tipo_usuario = %s, nombre_de_usuario = %s, contraseña = %s
                 WHERE nombre = %s AND apellido_paterno = %s AND apellido_materno = %s AND tipo_usuario = %s AND nombre_de_usuario = %s
             ''', (nombre, apellido_paterno, apellido_materno, tipo_usuario, nombre_usuario, contraseña, 
@@ -137,12 +137,12 @@ def editar_usuario():
         apellido_materno = request.args.get('apellido_materno')
         tipo_usuario = request.args.get('tipo_usuario')
         nombre_usuario = request.args.get('nombre_usuario')
-        
-        return render_template('editar_usuario.html', 
-                               nombre=nombre, 
-                               apellido_paterno=apellido_paterno, 
-                               apellido_materno=apellido_materno, 
-                               tipo_usuario=tipo_usuario, 
+
+        return render_template('editar_usuario.html',
+                               nombre=nombre,
+                               apellido_paterno=apellido_paterno,
+                               apellido_materno=apellido_materno,
+                               tipo_usuario=tipo_usuario,
                                nombre_usuario=nombre_usuario)
 
 
@@ -192,7 +192,6 @@ def editar_producto():
             print(f"Error al actualizar el producto: {e}")
             flash('Error al actualizar el producto')
             return redirect(url_for('productos'))
-    
     else:
         id_producto = request.args.get('id_producto')
         nombre_producto = request.args.get('nombre_producto')
@@ -201,14 +200,14 @@ def editar_producto():
         nombre_bodega = request.args.get('nombre_bodega')
         nombre_proveedor = request.args.get('nombre_proveedor')
         categoria = request.args.get('categoria')
-        
-        return render_template('editar_producto.html', 
-                               id_producto=id_producto, 
-                               nombre_producto=nombre_producto, 
-                               cantidad=cantidad, 
-                               presentacion=presentacion, 
-                               nombre_bodega=nombre_bodega, 
-                               nombre_proveedor=nombre_proveedor, 
+
+        return render_template('editar_producto.html',
+                               id_producto=id_producto,
+                               nombre_producto=nombre_producto,
+                               cantidad=cantidad,
+                               presentacion=presentacion,
+                               nombre_bodega=nombre_bodega,
+                               nombre_proveedor=nombre_proveedor,
                                categoria=categoria)
 
 
@@ -244,7 +243,7 @@ def insertar_producto():
     # Recupera los IDs y nombres de proveedores y bodegas de la base de datos
     conn = db.conectar()
     cursor = conn.cursor()
-    
+
     # Obtener proveedores
     cursor.execute("SELECT id_proveedor, nombre_proveedor FROM proveedores")
     proveedores = cursor.fetchall()
@@ -254,7 +253,12 @@ def insertar_producto():
     cursor.execute("SELECT id_bodega, nombre_bodega FROM bodega")
     bodegas = cursor.fetchall()
     form.fk_bodega.choices = [(bodega[0], bodega[1]) for bodega in bodegas]
-    
+
+    # Obtener categorias
+    cursor.execute("SELECT id_categoria, nombre FROM categoria")
+    categoria = cursor.fetchall()
+    form.fk_categoria.choices = [(categoria[0], categoria[1]) for categoria in categoria]
+
     cursor.close()
     db.desconectar(conn)
 
@@ -264,21 +268,72 @@ def insertar_producto():
         presentación = form.presentación.data
         fk_proveedores = form.fk_proveedores.data
         fk_bodega = form.fk_bodega.data
-        
+        fk_categoria=form.fk_categoria.data
+
+        print(f"Nombre: {nombre}, Cantidad: {cantidad}, Presentación: {presentación}, Proveedor: {fk_proveedores}, Bodega: {fk_bodega}, Categoria: {fk_categoria} ")
+
+        conn = db.conectar()
+        cursor = conn.cursor()
+        try:
+            cursor.execute('''
+            INSERT INTO productos (nombre, cantidad, presentación, fk_proveedores, fk_bodega, fk_categoria)
+            VALUES (%s, %s, %s, %s, %s, %s)
+            ''', (nombre, cantidad, presentación, fk_proveedores, fk_bodega, fk_categoria))
+            conn.commit()
+            flash('Producto añadido correctamente')
+        except Exception as e:
+            conn.rollback()
+            flash(f'Error al añadir el producto: {str(e)}')
+        finally:
+            cursor.close()
+            db.desconectar(conn)
+
+        return redirect(url_for('productos'))
+
+    return render_template('insertar_producto.html', form=form)
+
+@app.route('/buscar_productos', methods=['GET', 'POST'])
+def buscar_productos():
+    form = SearchForm()
+
+    # Recupera los IDs y nombres de bodegas y categorías de la base de datos
+    conn = db.conectar()
+    cursor = conn.cursor()
+
+    # Obtener bodegas
+    cursor.execute("SELECT id_bodega, nombre_bodega FROM bodega")
+    bodegas = cursor.fetchall()
+    form.bodega.choices = [(bodega[0], bodega[1]) for bodega in bodegas]
+
+    # Obtener categorías
+    cursor.execute("SELECT id_categoria, nombre FROM categoria")
+    categorias = cursor.fetchall()
+    form.categoria.choices = [(categoria[0], categoria[1]) for categoria in categorias]
+
+    cursor.close()
+    db.desconectar(conn)
+
+    productos = []
+
+    if form.validate_on_submit():
+        bodega_id = form.bodega.data
+        categoria_id = form.categoria.data
+
         conn = db.conectar()
         cursor = conn.cursor()
         cursor.execute('''
-        INSERT INTO productos (nombre, cantidad, presentación, fk_proveedores, fk_bodega)
-        VALUES (%s, %s, %s, %s, %s)
-        ''', (nombre, cantidad, presentación, fk_proveedores, fk_bodega))
-        conn.commit()
+        SELECT p.id_producto, p.nombre, p.cantidad, p.presentación, b.nombre_bodega, c.nombre
+        FROM productos p
+        JOIN bodega b ON p.fk_bodega = b.id_bodega
+        JOIN categoria c ON p.fk_categoria = c.id_categoria
+        WHERE p.fk_bodega = %s AND p.fk_categoria = %s
+        ''', (bodega_id, categoria_id))
+        productos = cursor.fetchall()
         cursor.close()
         db.desconectar(conn)
-        
-        flash('Producto añadido correctamente')
-        return redirect(url_for('productos'))  # Asegúrate de que 'productos' sea una función válida
-    
-    return render_template('insertar_producto.html', form=form)
+
+    return render_template('buscar_productos.html', form=form, productos=productos)
+
 
 @app.route('/bodegas')
 def bodegas():

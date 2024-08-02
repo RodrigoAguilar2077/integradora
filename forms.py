@@ -17,4 +17,11 @@ class Sags2Form(FlaskForm):
     presentación = StringField('Presentación', validators=[DataRequired()])
     fk_bodega = SelectField('Bodega', choices=[], validators=[DataRequired()])
     fk_proveedores = SelectField('Proveedor', choices=[], validators=[DataRequired()])
+    fk_categoria = SelectField('Categoria', choices=[], validators=[DataRequired()])
     submit = SubmitField('Agregar Producto')
+
+class SearchForm(FlaskForm):
+    bodega = SelectField('Bodega', choices=[])
+    categoria = SelectField('Categoría', choices=[])
+    submit = SubmitField('Buscar')
+

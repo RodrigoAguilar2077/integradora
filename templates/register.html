@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./assets/style.css">
+    <title>Registrarse</title>
+</head>
+<body>
+    <section>
+        <form method="POST" action="{{ url_for('register') }}">
+            <h1>Registrarse</h1>
+            <div class="inputbox">
+                <ion-icon name="mail-outline"></ion-icon>
+                <input type="text" name="username" required>
+                <label for="">Usuarios</label>
+            </div>
+            <div class="inputbox">
+                <ion-icon name="lock-closed-outline"></ion-icon>
+                <input type="password" name="password" required>
+                <label for="">Contraseñas</label>
+            </div>
+            <button type="submit">Registrarse</button>
+            <div class="register">
+                <p>Ya tengo una cuenta <a href="{{ url_for('login') }}">Iniciar sesión</a></p>
+            </div>
+        </form>
+    </section>
+</body>
+</html>
