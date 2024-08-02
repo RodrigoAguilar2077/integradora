@@ -1,5 +1,5 @@
 import psycopg2
-from flask import Flask, request, redirect, render_template, url_for, flash, session
+from flask import Flask, request, redirect, render_template, url_for, flash, session, send_file
 from flask_bootstrap import Bootstrap
 from flask_wtf import FlaskForm
 from wtforms.fields import PasswordField, StringField, SubmitField
@@ -458,21 +458,25 @@ def eliminar_bodega():
     return redirect(url_for('bodegas'))
 
 
-@app.route('/reportes')
+@app.route('/reportes', methods=['GET', 'POST'])
 def reportes():
+    bodega = request.form.get('bodega')
+    productos = []
     conn = db.conectar()
-    #crear un cursor (objeto para recorrer las tablas)
-
     cursor = conn.cursor()
-    #ejecutar un consulta en postgres
-    cursor.execute('''SELECT * FROM vista_usuarios''')
-    #recuperar la informacion
-    datos=cursor.fetchall()
-    #cerrar cursor y conexion a la base de datos
+    
+    # Consulta con parámetro
+    cursor.execute('''
+        SELECT nombre, cantidad
+        FROM productos
+        WHERE fk_bodega = (SELECT id_bodega FROM bodega WHERE nombre_bodega = %s);
+    ''', (bodega,))
+    
+    productos = cursor.fetchall()
     cursor.close()
-    db.desconectar(conn)
-    return render_template('usuarios.html', datos=datos)
-
+    conn.close()
+    
+    return render_template('reportes.html', productos=productos, bodega=bodega)
 
 if __name__ == "__main__":
     app.secret_key="vramcorporation"

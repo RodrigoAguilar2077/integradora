@@ -6,7 +6,7 @@
             Tienda SAGS
         {% endblock %}
     </title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='assets/style/style.css') }}">
+    <link rel="stylesheet" href="../static/assets/style/style.css">
 {% endblock %}
 
 {% block body %}
@@ -18,8 +18,9 @@
         {% block content %}
         <div class="container mt-4">
             <h2>Lista de Productos</h2>
-            <div class="mb-3">
-                <a href="{{ url_for('buscar_productos') }}" class="btn btn-primary">Buscar Productos</a>
+            <div class="d-flex mb-3">
+                <a href="{{ url_for('buscar_productos') }}" class="btn btn-secondary me-2">Buscar Productos</a>
+                <a href="{{ url_for('insertar_producto') }}" class="btn btn-success">Insertar Producto</a>
             </div>
             <div class="table-responsive">
                 <table class="table table-bordered table-hover table-sm">

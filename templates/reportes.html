@@ -1,0 +1,59 @@
+{% extends 'bootstrap/base.html' %}
+{% block head %}
+    {{ super() }}
+    <title>
+        {% block title %}
+            Reporte de Productos - Tienda SAGS
+        {% endblock %}
+    </title>
+    <link rel="stylesheet" href="../static/assets/style/style.css">
+{% endblock %}
+
+{% block body %}
+    {% block navbar %}
+        {% include 'navbar.html' %}
+    {% endblock %}
+
+    <div class="main-content">
+        {% block content %}
+        <div class="container mt-4">
+            <h2>Reporte de Productos por Bodega</h2>
+            <form action="{{ url_for('reportes') }}" method="post" class="mb-3">
+                <label for="bodega">Selecciona una bodega:</label>
+                <select name="bodega" id="bodega" class="form-control" style="max-width: 300px; display: inline-block; margin-left: 10px;">
+                    <option value="Bodega A" {% if bodega == 'Bodega A' %}selected{% endif %}>Bodega A</option>
+                    <option value="Bodega B" {% if bodega == 'Bodega B' %}selected{% endif %}>Bodega B</option>
+                </select>
+                <button type="submit" class="btn btn-primary" style="margin-left: 10px;">Ver Reporte</button>
+            </form>
+            
+            <form action="{{ url_for('reportes') }}" method="post" style="display:inline;">
+                <input type="hidden" name="bodega" value="{{ bodega }}">
+                <input type="hidden" name="descargar_pdf" value="true">
+                <button type="submit" class="btn btn-danger">Descargar PDF</button>
+            </form>
+
+            <div class="row">
+                <div class="col-md-12">
+                    <table class="table table-bordered table-hover table-sm">
+                        <thead class="thead-dark">
+                            <tr>
+                                <th scope="col">Nombre del Producto</th>
+                                <th scope="col">Cantidad</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for producto in productos %}
+                            <tr>
+                                <td>{{ producto[0] }}</td>
+                                <td>{{ producto[1] }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        {% endblock %}
+    </div>
+{% endblock %}
