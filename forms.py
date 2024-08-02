@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, IntegerField, SubmitField, SelectField
-from wtforms.validators import DataRequired
+from wtforms import StringField, IntegerField, SubmitField, SelectField, PasswordField
+from wtforms.validators import DataRequired, EqualTo
 
 class Sags1Form(FlaskForm):
     nombre = StringField('Nombre Usuario', validators=[DataRequired()])
@@ -25,3 +25,13 @@ class SearchForm(FlaskForm):
     categoria = SelectField('Categoría', choices=[])
     submit = SubmitField('Buscar')
 
+
+class RegisterForm(FlaskForm):
+    nombre = StringField('Nombre', validators=[DataRequired()])
+    apellido_paterno = StringField('Apellido Paterno', validators=[DataRequired()])
+    apellido_materno = StringField('Apellido Materno', validators=[DataRequired()])
+    tipo_usuario = SelectField('Tipo de Usuario', choices=[('admin', 'Administrador'), ('user', 'Almacenista')], validators=[DataRequired()])
+    nombre_de_usuario = StringField('Nombre de Usuario', validators=[DataRequired()])
+    contraseña = PasswordField('Contraseña', validators=[DataRequired()])
+    confirm_password = PasswordField('Confirmar Contraseña', validators=[DataRequired(), EqualTo('contraseña')])
+    submit = SubmitField('Registrar')

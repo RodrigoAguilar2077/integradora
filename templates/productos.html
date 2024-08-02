@@ -18,6 +18,9 @@
         {% block content %}
         <div class="container mt-4">
             <h2>Lista de Productos</h2>
+            <div class="mb-3">
+                <a href="{{ url_for('buscar_productos') }}" class="btn btn-primary">Buscar Productos</a>
+            </div>
             <div class="table-responsive">
                 <table class="table table-bordered table-hover table-sm">
                     <thead class="thead-dark">

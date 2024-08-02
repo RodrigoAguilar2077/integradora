@@ -1,5 +1,5 @@
 import psycopg2
-from flask import Flask, request, redirect, render_template, url_for, flash
+from flask import Flask, request, redirect, render_template, url_for, flash, session
 from flask_bootstrap import Bootstrap
 from flask_wtf import FlaskForm
 from wtforms.fields import PasswordField, StringField, SubmitField
@@ -7,6 +7,7 @@ import db
 from forms import Sags1Form
 from forms import Sags2Form
 from forms import SearchForm
+from forms import RegisterForm
 
 app = Flask(__name__)
 bootstrap = Bootstrap(app)
@@ -14,6 +15,58 @@ app.config['SECRET_KEY']= 'SUPER SECRETO'
 # csrf = CSRFProtect(app)
 
 @app.route('/')
+def index():
+    return render_template('login.html')
+
+@app.route('/acceso-login', methods=["GET", "POST"])
+def login():
+    if request.method == 'POST' and 'username' in request.form and 'password' in request.form:
+        _correo = request.form['username']
+        _password = request.form['password']
+
+        conn = db.conectar()
+        cursor = conn.cursor()
+        cursor.execute('''SELECT * FROM usuarios WHERE usuario_usuario=%s AND contrasena_usuario=%s''', (_correo, _password))
+        account = cursor.fetchone()
+        cursor.close()
+        conn.close()
+
+        if account:
+            session['logueado'] = True
+            session['id'] = account[0]
+            return render_template('base.html')
+        else:
+            return render_template('login.html', mensaje="Usuario o Contraseña incorrecta")
+    return render_template('login.html')
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    form = RegisterForm()
+    if form.validate_on_submit():
+        nombre = form.nombre.data
+        apellido_paterno = form.apellido_paterno.data
+        apellido_materno = form.apellido_materno.data
+        tipo_usuario = form.tipo_usuario.data
+        nombre_de_usuario = form.nombre_de_usuario.data
+        contraseña = form.contraseña.data
+        
+        conn = db.conectar()
+        cursor = conn.cursor()
+        cursor.execute('''
+        INSERT INTO vista_usuarios (nombre, apellido_paterno, apellido_materno, tipo_usuario, nombre_de_usuario, contraseña)
+        VALUES (%s, %s, %s, %s, %s, %s)
+        ''', (nombre, apellido_paterno, apellido_materno, tipo_usuario, nombre_de_usuario, contraseña))
+        conn.commit()
+        cursor.close()
+        db.desconectar(conn)
+        
+        flash('Te has registrado con éxito!', 'success')
+        return redirect(url_for('login'))
+
+    return render_template('register.html', form=form)
+
+
+app.route('/admin')
 def index():
     return render_template('base.html')
 
