@@ -49,7 +49,7 @@ def register():
         tipo_usuario = form.tipo_usuario.data
         nombre_de_usuario = form.nombre_de_usuario.data
         contraseña = form.contraseña.data
-        
+
         conn = db.conectar()
         cursor = conn.cursor()
         cursor.execute('''
@@ -59,7 +59,7 @@ def register():
         conn.commit()
         cursor.close()
         db.desconectar(conn)
-        
+
         flash('Te has registrado con éxito!', 'success')
         return redirect(url_for('login'))
 
@@ -111,7 +111,7 @@ def insertar_usuario():
         db.desconectar(conn)
         
         flash('Usuario añadido correctamente')
-        return redirect(url_for('usuarios'))  # Corrige el nombre de la función para redirigir
+        return redirect(url_for('usuarios'))
 
     return render_template('insertar_usuario.html', form=form)
 
@@ -148,14 +148,12 @@ def eliminar_usuario():
 def editar_usuario():
     if request.method == 'POST':
         try:
-            # Obtén los valores originales de los campos
             original_nombre = request.form['original_nombre']
             original_apellido_paterno = request.form['original_apellido_paterno']
             original_apellido_materno = request.form['original_apellido_materno']
             original_tipo_usuario = request.form['original_tipo_usuario']
             original_nombre_usuario = request.form['original_nombre_usuario']
 
-            # Obtén los nuevos valores de los campos
             nombre = request.form['nombre']
             apellido_paterno = request.form['apellido_paterno']
             apellido_materno = request.form['apellido_materno']
@@ -163,7 +161,6 @@ def editar_usuario():
             nombre_usuario = request.form['nombre_usuario']
             contraseña = request.form['contraseña']
 
-            # Conecta a la base de datos y realiza la actualización
             conn = db.conectar()
             cursor = conn.cursor()
             cursor.execute('''
@@ -293,21 +290,17 @@ def eliminar_producto():
 def insertar_producto():
     form = Sags2Form()
 
-    # Recupera los IDs y nombres de proveedores y bodegas de la base de datos
     conn = db.conectar()
     cursor = conn.cursor()
 
-    # Obtener proveedores
     cursor.execute("SELECT id_proveedor, nombre_proveedor FROM proveedores")
     proveedores = cursor.fetchall()
     form.fk_proveedores.choices = [(proveedor[0], proveedor[1]) for proveedor in proveedores]
 
-    # Obtener bodegas
     cursor.execute("SELECT id_bodega, nombre_bodega FROM bodega")
     bodegas = cursor.fetchall()
     form.fk_bodega.choices = [(bodega[0], bodega[1]) for bodega in bodegas]
 
-    # Obtener categorias
     cursor.execute("SELECT id_categoria, nombre FROM categoria")
     categoria = cursor.fetchall()
     form.fk_categoria.choices = [(categoria[0], categoria[1]) for categoria in categoria]
@@ -349,16 +342,13 @@ def insertar_producto():
 def buscar_productos():
     form = SearchForm()
 
-    # Recupera los IDs y nombres de bodegas y categorías de la base de datos
     conn = db.conectar()
     cursor = conn.cursor()
 
-    # Obtener bodegas
     cursor.execute("SELECT id_bodega, nombre_bodega FROM bodega")
     bodegas = cursor.fetchall()
     form.bodega.choices = [(bodega[0], bodega[1]) for bodega in bodegas]
 
-    # Obtener categorías
     cursor.execute("SELECT id_categoria, nombre FROM categoria")
     categorias = cursor.fetchall()
     form.categoria.choices = [(categoria[0], categoria[1]) for categoria in categorias]
@@ -465,7 +455,6 @@ def reportes():
     conn = db.conectar()
     cursor = conn.cursor()
     
-    # Consulta con parámetro
     cursor.execute('''
         SELECT nombre, cantidad
         FROM productos
