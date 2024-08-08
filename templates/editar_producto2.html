@@ -11,14 +11,14 @@
 
 {% block body %}
     {% block navbar %}
-        {% include 'navbar.html' %}
+        {% include 'navbar2.html' %}
     {% endblock %}
 
     <div class="main-content">
         {% block content %}
         <div class="container mt-4">
             <h2>Editar Producto</h2>
-            <form action="{{ url_for('editar_producto') }}" method="post">
+            <form action="{{ url_for('editar_producto2') }}" method="post">
                 <input type="hidden" name="original_id_producto" value="{{ id_producto }}">
                 
                 <div class="mb-3">

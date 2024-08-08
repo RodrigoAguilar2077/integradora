@@ -1,0 +1,26 @@
+{% extends 'bootstrap/base.html' %}
+{% block head %}
+    {{ super() }}
+    <title>
+        {% block title %}
+            Tienda SAGS
+        {% endblock %}
+    </title>
+    <link rel="stylesheet" href="../static/assets/style/style.css">
+{% endblock %}
+
+{% block body %}
+<body class="general-body">
+    {% block navbar %}
+        {% include 'navbar2.html' %}
+    {% endblock %}
+
+    {% block content %}
+    <div class="container-md text-center mt-5">
+        <img src="../static/assets/sags.jpg" alt="Logo" class="img-fluid rounded">
+        <h1 class="mt-4">Bienvenido a Tienda SAGS</h1>
+        <p class="lead">Su tienda de confianza para los mejores productos.</p>
+    </div>
+    {% endblock %}
+</body>
+{% endblock %}

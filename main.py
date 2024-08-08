@@ -1,4 +1,5 @@
 import psycopg2
+from psycopg2.extras import RealDictCursor
 from flask import Flask, request, redirect, render_template, url_for, flash, session, send_file
 from flask_bootstrap import Bootstrap
 from flask_wtf import FlaskForm
@@ -14,8 +15,25 @@ bootstrap = Bootstrap(app)
 app.config['SECRET_KEY']= 'SUPER SECRETO'
 # csrf = CSRFProtect(app)
 
+# ADMINISTRADOR
+@app.route('/base')
+def base():
+    return render_template('base.html')
+
+app.secret_key = "vramcorporation"
 @app.route('/')
 def index():
+    if 'tipo_usuario' not in session or session['tipo_usuario'] != 'Administrador':
+        flash('Acceso denegado. Debes ser ADMINISTRADOR para acceder a esta página.')
+        return redirect(url_for('login'))
+    return render_template('login.html')
+
+import psycopg2
+from psycopg2.extras import RealDictCursor
+
+# Ruta para el endpoint 'login_view'
+@app.route('/login')
+def login_view():
     return render_template('login.html')
 
 @app.route('/acceso-login', methods=["GET", "POST"])
@@ -24,20 +42,47 @@ def login():
         _correo = request.form['username']
         _password = request.form['password']
 
-        conn = db.conectar()
-        cursor = conn.cursor()
-        cursor.execute('''SELECT * FROM usuarios WHERE usuario_usuario=%s AND contrasena_usuario=%s''', (_correo, _password))
-        account = cursor.fetchone()
-        cursor.close()
-        conn.close()
+        conn = None
+        cursor = None
+        cuenta = None
 
-        if account:
-            session['logueado'] = True
-            session['id'] = account[0]
-            return render_template('base.html')
+        try:
+            conn = db.conectar()  # Conexión a la base de datos usando tu método
+            cursor = conn.cursor(cursor_factory=RealDictCursor)
+            cursor.execute('''
+                SELECT * FROM usuarios WHERE usuario_usuario = %s AND contrasena_usuario = %s
+            ''', (_correo, _password))
+            cuenta = cursor.fetchone()
+
+        except Exception as e:
+            print(f"Error: {e}")
+
+        finally:
+            if cursor:
+                cursor.close()
+            if conn:
+                conn.close()
+
+        if cuenta:
+            if cuenta['tipo_usuario'] == 'Administrador':
+                session['tipo_usuario'] = 'Administrador'
+                return redirect(url_for('base'))
+            elif cuenta['tipo_usuario'] == 'Almacenista':
+                session['tipo_usuario'] = 'Almacenista'
+                return redirect(url_for('base_almacenista'))
+            else:
+                return redirect(url_for('login_view'))
         else:
-            return render_template('login.html', mensaje="Usuario o Contraseña incorrecta")
+            return redirect(url_for('login_view'))
     return render_template('login.html')
+
+@app.route('/admin')
+def admin():
+    if session.get('logueado'):
+        return render_template('base.html')
+    else:
+        return render_template('login.html', mensaje="Acceso no autorizado")
+    
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -421,9 +466,9 @@ def editar_bodega():
         ubicacion = request.args.get('ubicacion')
         
         return render_template('editar_bodega.html', 
-                               id_bodega=id_bodega, 
-                               nombre_bodega=nombre_bodega, 
-                               ubicacion=ubicacion)
+                                id_bodega=id_bodega, 
+                                nombre_bodega=nombre_bodega, 
+                                ubicacion=ubicacion)
 
 @app.route('/eliminar_bodega', methods=['POST'])
 def eliminar_bodega():
@@ -466,6 +511,195 @@ def reportes():
     conn.close()
     
     return render_template('reportes.html', productos=productos, bodega=bodega)
+
+
+# ALMACENISTA
+@app.route('/base_almacenista')
+def base_almacenista():
+    return render_template('base_almacenista.html')
+
+@app.route('/productos2')
+def productos2():
+    conn = db.conectar()
+    #crear un cursor (objeto para recorrer las tablas)
+
+    cursor = conn.cursor()
+    #ejecutar un consulta en postgres
+    cursor.execute('''SELECT * FROM vista_productos ORDER BY id_producto''')
+    #recuperar la informacion
+    datos=cursor.fetchall()
+    #cerrar cursor y conexion a la base de datos
+    cursor.close()
+    db.desconectar(conn)
+    return render_template('productos2.html', datos=datos)
+
+@app.route('/editar_producto2', methods=['GET', 'POST'])
+def editar_producto2():
+    if request.method == 'POST':
+        try:
+            original_id_producto = request.form['original_id_producto']
+            nombre_producto = request.form['nombre_producto']
+            cantidad = request.form['cantidad']
+            presentacion = request.form['presentacion']
+            nombre_bodega = request.form['nombre_bodega']
+            nombre_proveedor = request.form['nombre_proveedor']
+            categoria = request.form['categoria']
+
+            conn = db.conectar()
+            cursor = conn.cursor()
+            cursor.execute('''
+                UPDATE vista_productos
+                SET nombre_producto = %s, cantidad = %s, presentacion = %s, nombre_bodega = %s, nombre_proveedor = %s, categoria = %s
+                WHERE id_producto = %s
+            ''', (nombre_producto, cantidad, presentacion, nombre_bodega, nombre_proveedor, categoria, original_id_producto))
+            conn.commit()
+            cursor.close()
+            db.desconectar(conn)
+
+            flash('Producto actualizado correctamente')
+            return redirect(url_for('productos'))
+
+        except Exception as e:
+            print(f"Error al actualizar el producto: {e}")
+            flash('Error al actualizar el producto')
+            return redirect(url_for('productos'))
+    else:
+        id_producto = request.args.get('id_producto')
+        nombre_producto = request.args.get('nombre_producto')
+        cantidad = request.args.get('cantidad')
+        presentacion = request.args.get('presentacion')
+        nombre_bodega = request.args.get('nombre_bodega')
+        nombre_proveedor = request.args.get('nombre_proveedor')
+        categoria = request.args.get('categoria')
+
+        return render_template('editar_producto2.html',
+                                id_producto=id_producto,
+                                nombre_producto=nombre_producto,
+                                cantidad=cantidad,
+                                presentacion=presentacion,
+                                nombre_bodega=nombre_bodega,
+                                nombre_proveedor=nombre_proveedor,
+                                categoria=categoria)
+
+@app.route('/insertar_producto2', methods=['GET', 'POST'])
+def insertar_producto2():
+    form = Sags2Form()
+
+    conn = db.conectar()
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT id_proveedor, nombre_proveedor FROM proveedores")
+    proveedores = cursor.fetchall()
+    form.fk_proveedores.choices = [(proveedor[0], proveedor[1]) for proveedor in proveedores]
+
+    cursor.execute("SELECT id_bodega, nombre_bodega FROM bodega")
+    bodegas = cursor.fetchall()
+    form.fk_bodega.choices = [(bodega[0], bodega[1]) for bodega in bodegas]
+
+    cursor.execute("SELECT id_categoria, nombre FROM categoria")
+    categoria = cursor.fetchall()
+    form.fk_categoria.choices = [(categoria[0], categoria[1]) for categoria in categoria]
+
+    cursor.close()
+    db.desconectar(conn)
+
+    if form.validate_on_submit():
+        nombre = form.nombre.data
+        cantidad = form.cantidad.data
+        presentación = form.presentación.data
+        fk_proveedores = form.fk_proveedores.data
+        fk_bodega = form.fk_bodega.data
+        fk_categoria=form.fk_categoria.data
+
+        print(f"Nombre: {nombre}, Cantidad: {cantidad}, Presentación: {presentación}, Proveedor: {fk_proveedores}, Bodega: {fk_bodega}, Categoria: {fk_categoria} ")
+
+        conn = db.conectar()
+        cursor = conn.cursor()
+        try:
+            cursor.execute('''
+            INSERT INTO productos (nombre, cantidad, presentación, fk_proveedores, fk_bodega, fk_categoria)
+            VALUES (%s, %s, %s, %s, %s, %s)
+            ''', (nombre, cantidad, presentación, fk_proveedores, fk_bodega, fk_categoria))
+            conn.commit()
+            flash('Producto añadido correctamente')
+        except Exception as e:
+            conn.rollback()
+            flash(f'Error al añadir el producto: {str(e)}')
+        finally:
+            cursor.close()
+            db.desconectar(conn)
+
+        return redirect(url_for('productos'))
+
+    return render_template('insertar_producto2.html', form=form)
+
+@app.route('/buscar_productos2', methods=['GET', 'POST'])
+def buscar_productos2():
+    form = SearchForm()
+
+    conn = db.conectar()
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT id_bodega, nombre_bodega FROM bodega")
+    bodegas = cursor.fetchall()
+    form.bodega.choices = [(bodega[0], bodega[1]) for bodega in bodegas]
+
+    cursor.execute("SELECT id_categoria, nombre FROM categoria")
+    categorias = cursor.fetchall()
+    form.categoria.choices = [(categoria[0], categoria[1]) for categoria in categorias]
+
+    cursor.close()
+    db.desconectar(conn)
+
+    productos = []
+
+    if form.validate_on_submit():
+        bodega_id = form.bodega.data
+        categoria_id = form.categoria.data
+
+        conn = db.conectar()
+        cursor = conn.cursor()
+        cursor.execute('''
+        SELECT p.id_producto, p.nombre, p.cantidad, p.presentación, b.nombre_bodega, c.nombre
+        FROM productos p
+        JOIN bodega b ON p.fk_bodega = b.id_bodega
+        JOIN categoria c ON p.fk_categoria = c.id_categoria
+        WHERE p.fk_bodega = %s AND p.fk_categoria = %s
+        ''', (bodega_id, categoria_id))
+        productos = cursor.fetchall()
+        cursor.close()
+        db.desconectar(conn)
+
+    return render_template('buscar_productos2.html', form=form, productos=productos)
+
+@app.route('/bodegas2')
+def bodegas2():
+    conn = db.conectar()
+    cursor = conn.cursor()
+    cursor.execute('''SELECT * FROM bodega ORDER BY id_bodega''')
+    datos = cursor.fetchall()
+    cursor.close()
+    db.desconectar(conn)
+    return render_template('bodegas2.html', datos=datos)
+
+@app.route('/reportes2', methods=['GET', 'POST'])
+def reportes2():
+    bodega = request.form.get('bodega')
+    productos = []
+    conn = db.conectar()
+    cursor = conn.cursor()
+    
+    cursor.execute('''
+        SELECT nombre, cantidad
+        FROM productos
+        WHERE fk_bodega = (SELECT id_bodega FROM bodega WHERE nombre_bodega = %s);
+    ''', (bodega,))
+    
+    productos = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    
+    return render_template('reportes2.html', productos=productos, bodega=bodega)
 
 if __name__ == "__main__":
     app.secret_key="vramcorporation"

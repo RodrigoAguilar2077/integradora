@@ -12,7 +12,7 @@
 {% block body %}
 <body class="general-body">
     {% block navbar %}
-        {% include 'navbar.html' %}
+        {% include 'navbar2.html' %}
     {% endblock %}
 
     <div class="main-content">
@@ -36,11 +36,7 @@
                             <td>{{ bodega[1] }}</td>
                             <td>{{ bodega[2] }}</td>
                             <td>
-                                <a href="{{ url_for('editar_bodega', id_bodega=bodega[0], nombre_bodega=bodega[1], ubicacion=bodega[2]) }}" class="btn btn-primary btn-sm">Editar</a>
-                                <form action="{{ url_for('eliminar_bodega') }}" method="post" style="display:inline;">
-                                    <input type="hidden" name="id_bodega" value="{{ bodega[0] }}">
-                                    <input type="submit" value="Eliminar" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de que quieres eliminar esta bodega?');">
-                                </form>
+                                <a href="{{ url_for('editar_bodega2', id_bodega=bodega[0], nombre_bodega=bodega[1], ubicacion=bodega[2]) }}" class="btn btn-primary btn-sm">Editar</a>
                             </td>
                         </tr>
                         {% endfor %}
