@@ -9,6 +9,7 @@ from forms import Sags1Form
 from forms import Sags2Form
 from forms import SearchForm
 from forms import RegisterForm
+from forms import EditarProductoForm
 
 app = Flask(__name__)
 bootstrap = Bootstrap(app)
@@ -282,53 +283,90 @@ def productos_total():
     
     return render_template('productos_total.html', datos=datos)
 
-@app.route('/editar_producto', methods=['GET', 'POST'])
-def editar_producto():
+@app.route('/editar_producto/<int:id_producto>', methods=['GET', 'POST'])
+def editar_producto(id_producto):
+    form = EditarProductoForm()
+
     if request.method == 'POST':
-        try:
-            original_id_producto = request.form['original_id_producto']
-            nombre_producto = request.form['nombre_producto']
-            cantidad = int(request.form['cantidad'])
-            presentacion = request.form['presentacion']
-            nombre_bodega = request.form['nombre_bodega']
-            nombre_proveedor = request.form['nombre_proveedor']
-            categoria = request.form['categoria']
+        if form.validate_on_submit():
+            try:
+                # Datos del formulario
+                nombre = form.nombre.data
+                cantidad = form.cantidad.data
+                presentación = form.presentación.data
+                fk_bodega = form.fk_bodega.data
+                fk_proveedores = form.fk_proveedores.data
+                fk_categoria = form.fk_categoria.data
 
-            conn = db.conectar()
-            cursor = conn.cursor()
-            cursor.execute('''
-                UPDATE vista_productos
-                SET nombre_producto = %s, cantidad = %s, presentacion = %s, nombre_bodega = %s, nombre_proveedor = %s, categoria = %s
-                WHERE id_producto = %s
-            ''', (nombre_producto, cantidad, presentacion, nombre_bodega, nombre_proveedor, categoria, original_id_producto))
-            conn.commit()
-            cursor.close()
-            db.desconectar(conn)
+                conn = db.conectar()
+                cursor = conn.cursor()
 
-            flash('Producto actualizado correctamente')
-            return redirect(url_for('productos'))
+                # Actualizar la información del producto
+                cursor.execute('''
+                    UPDATE productos
+                    SET nombre = %s, cantidad = %s, presentación = %s, fk_bodega = %s, fk_proveedores = %s, fk_categoria = %s
+                    WHERE id_producto = %s
+                ''', (nombre, cantidad, presentación, fk_bodega, fk_proveedores, fk_categoria, id_producto))
+                
+                conn.commit()
+                cursor.close()
+                db.desconectar(conn)
 
-        except Exception as e:
-            print(f"Error al actualizar el producto: {e}")
-            flash('Error al actualizar el producto')
-            return redirect(url_for('productos'))
+                flash('Producto actualizado correctamente')
+                return redirect(url_for('productos'))
+            
+            except Exception as e:
+                print(f"Error al actualizar el producto: {e}")
+                flash('Error al actualizar el producto')
+                return redirect(url_for('productos'))
+        else:
+            flash('Formulario no válido. Por favor, corrige los errores.')
+
     else:
-        id_producto = request.args.get('id_producto')
-        nombre_producto = request.args.get('nombre_producto')
-        cantidad = request.args.get('cantidad')
-        presentacion = request.args.get('presentacion')
-        nombre_bodega = request.args.get('nombre_bodega')
-        nombre_proveedor = request.args.get('nombre_proveedor')
-        categoria = request.args.get('categoria')
+        # Cargar datos del producto para el formulario
+        conn = db.conectar()
+        cursor = conn.cursor()
+        
+        # Obtener datos del producto
+        cursor.execute('''
+            SELECT nombre, cantidad, presentación, fk_bodega, fk_proveedores, fk_categoria
+            FROM productos
+            WHERE id_producto = %s
+        ''', (id_producto,))
+        producto = cursor.fetchone()
 
-        return render_template('editar_producto.html',
-                               id_producto=id_producto,
-                               nombre_producto=nombre_producto,
-                               cantidad=cantidad,
-                               presentacion=presentacion,
-                               nombre_bodega=nombre_bodega,
-                               nombre_proveedor=nombre_proveedor,
-                               categoria=categoria)
+        if producto:
+            form.nombre.data = producto[0]
+            form.cantidad.data = producto[1]
+            form.presentación.data = producto[2]
+            form.fk_bodega.data = producto[3]
+            form.fk_proveedores.data = producto[4]
+            form.fk_categoria.data = producto[5]
+        else:
+            flash('Producto no encontrado.')
+            return redirect(url_for('productos'))
+
+        # Obtener las opciones para los SelectField
+        cursor.execute('SELECT id_bodega, nombre_bodega FROM bodega')
+        bodegas = [(b[0], b[1]) for b in cursor.fetchall()]
+
+        cursor.execute('SELECT id_proveedor, nombre_proveedor FROM proveedores')
+        proveedores = [(p[0], p[1]) for p in cursor.fetchall()]
+
+        cursor.execute('SELECT id_categoria, nombre FROM categoria')
+        categorias = [(c[0], c[1]) for c in cursor.fetchall()]
+
+        cursor.close()
+        db.desconectar(conn)
+
+        form.fk_bodega.choices = bodegas
+        form.fk_proveedores.choices = proveedores
+        form.fk_categoria.choices = categorias
+
+    return render_template('editar_producto.html', form=form, id_producto=id_producto)
+
+
+
 
 
 @app.route('/eliminar_producto', methods=['POST'])

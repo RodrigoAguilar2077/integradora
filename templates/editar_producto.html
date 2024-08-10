@@ -8,7 +8,6 @@
     </title>
     <link rel="stylesheet" href="../static/assets/style/style.css">
     <link rel="stylesheet" href="../static/assets/style/formularios.css">
-
 {% endblock %}
 
 {% block body %}
@@ -17,46 +16,48 @@
         <div class="container-md">
         <div class="container mt-4">
             <h2>Editar Producto</h2>
-            <form action="{{ url_for('editar_producto') }}" method="post">
+            <form method="post" action="{{ url_for('editar_producto', id_producto=id_producto) }}">
+                {{ form.hidden_tag() }} <!-- Agrega todos los campos ocultos de CSRF y otros -->
+
                 <input type="hidden" name="original_id_producto" value="{{ id_producto }}">
-                
+
                 <div class="mb-3">
-                    <label for="nombre_producto" class="form-label">Nombre del Producto</label>
-                    <input type="text" name="nombre_producto" class="form-control" value="{{ nombre_producto }}" required>
+                    {{ form.nombre.label(class="form-label") }}
+                    {{ form.nombre(class="form-control", value=form.nombre.data) }}
                 </div>
-                
+
                 <div class="mb-3">
-                    <label for="cantidad" class="form-label">Cantidad</label>
-                    <input type="text" name="cantidad" class="form-control" value="{{ cantidad }}" required>
+                    {{ form.cantidad.label(class="form-label") }}
+                    {{ form.cantidad(class="form-control", value=form.cantidad.data) }}
                 </div>
-                
+
                 <div class="mb-3">
-                    <label for="presentacion" class="form-label">Presentación</label>
-                    <input type="text" name="presentacion" class="form-control" value="{{ presentacion }}" required>
+                    {{ form.presentación.label(class="form-label") }}
+                    {{ form.presentación(class="form-control", value=form.presentación.data) }}
                 </div>
-                
+
                 <div class="mb-3">
-                    <label for="nombre_bodega" class="form-label">Nombre de la Bodega</label>
-                    <input type="text" name="nombre_bodega" class="form-control" value="{{ nombre_bodega }}" required>
+                    {{ form.fk_bodega.label(class="form-label") }}
+                    {{ form.fk_bodega(class="form-control") }}
                 </div>
-                
+
                 <div class="mb-3">
-                    <label for="nombre_proveedor" class="form-label">Nombre del Proveedor</label>
-                    <input type="text" name="nombre_proveedor" class="form-control" value="{{ nombre_proveedor }}" required>
+                    {{ form.fk_proveedores.label(class="form-label") }}
+                    {{ form.fk_proveedores(class="form-control") }}
                 </div>
-                
+
                 <div class="mb-3">
-                    <label for="categoria" class="form-label">Categoría</label>
-                    <input type="text" name="categoria" class="form-control" value="{{ categoria }}" required>
+                    {{ form.fk_categoria.label(class="form-label") }}
+                    {{ form.fk_categoria(class="form-control") }}
                 </div>
-                
+
                 <div class="d-flex justify-content-between">
-                    <button type="submit" class="btn btn-primary">Actualizar</button>
+                    {{ form.submit(class="btn btn-primary") }}
                     <a href="{{ url_for('productos') }}" class="btn btn-secondary">Cancelar</a>
                 </div>
             </form>
         </div>
         {% endblock %}
     </div>
-        </div>
+    </div>
 {% endblock %}

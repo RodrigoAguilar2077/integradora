@@ -35,3 +35,12 @@ class RegisterForm(FlaskForm):
     contraseña = PasswordField('Contraseña', validators=[DataRequired()])
     confirm_password = PasswordField('Confirmar Contraseña', validators=[DataRequired(), EqualTo('contraseña')])
     submit = SubmitField('Registrar')
+
+class EditarProductoForm(FlaskForm):
+        nombre = StringField('Nombre', validators=[DataRequired()])
+        cantidad = IntegerField('Cantidad', validators=[DataRequired()])
+        presentación = StringField('Presentación', validators=[DataRequired()])
+        fk_bodega = SelectField('Bodega', choices=[], validators=[DataRequired()])
+        fk_proveedores = SelectField('Proveedor', choices=[], validators=[DataRequired()])
+        fk_categoria = SelectField('Categoría', choices=[], validators=[DataRequired()])
+        submit = SubmitField('Actualizar Producto')
