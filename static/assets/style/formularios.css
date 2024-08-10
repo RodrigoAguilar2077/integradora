@@ -10,10 +10,11 @@ body {
 }
 
 /* Contenedor principal para alinear los elementos en columna */
-.container-mdr {
+.container-md {
     display: flex;
     flex-direction: column; /* Alinea los elementos en una columna */
-    gap: 20px; /* Espacio entre el formulario y los resultados */
+    gap: 20px;
+    background-color: aliceblue; /* Espacio entre el formulario y los resultados */
 }
 
 /* Ajusta el contenedor del formulario */

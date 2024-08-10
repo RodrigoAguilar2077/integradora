@@ -244,18 +244,43 @@ def editar_usuario():
 
 @app.route('/productos')
 def productos():
-    conn = db.conectar()
-    #crear un cursor (objeto para recorrer las tablas)
+      # Obtiene la página actual del parámetro de consulta, por defecto es 1
+    page = request.args.get('page', 1, type=int)
+    per_page = 10  # Número de productos por página
+    offset = (page - 1) * per_page
 
+    conn = db.conectar()
     cursor = conn.cursor()
-    #ejecutar un consulta en postgres
-    cursor.execute('''SELECT * FROM vista_productos ORDER BY id_producto''')
-    #recuperar la informacion
-    datos=cursor.fetchall()
-    #cerrar cursor y conexion a la base de datos
+
+    # Consulta para obtener los productos paginados
+    cursor.execute('''
+        SELECT * FROM vista_productos
+        ORDER BY id_producto
+        LIMIT %s OFFSET %s
+    ''', (per_page, offset))
+    datos = cursor.fetchall()
+
+    # Consulta para contar el total de productos
+    cursor.execute('SELECT COUNT(*) FROM vista_productos')
+    total = cursor.fetchone()[0]
+
     cursor.close()
     db.desconectar(conn)
-    return render_template('productos.html', datos=datos)
+
+    return render_template('productos.html', datos=datos, page=page, per_page=per_page, total=total)
+
+@app.route('/productos/total')
+def productos_total():
+    conn = db.conectar()
+    cursor = conn.cursor()
+    
+    cursor.execute('''SELECT * FROM vista_productos ORDER BY id_producto''')
+    datos = cursor.fetchall()
+    
+    cursor.close()
+    db.desconectar(conn)
+    
+    return render_template('productos_total.html', datos=datos)
 
 @app.route('/editar_producto', methods=['GET', 'POST'])
 def editar_producto():
@@ -263,7 +288,7 @@ def editar_producto():
         try:
             original_id_producto = request.form['original_id_producto']
             nombre_producto = request.form['nombre_producto']
-            cantidad = request.form['cantidad']
+            cantidad = int(request.form['cantidad'])
             presentacion = request.form['presentacion']
             nombre_bodega = request.form['nombre_bodega']
             nombre_proveedor = request.form['nombre_proveedor']

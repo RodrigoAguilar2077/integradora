@@ -18,6 +18,7 @@ header {
 
 .main-nav {
   height: 90px;
+  width: 100%;
 }
 
 .logo {
@@ -94,6 +95,7 @@ li a.contact:hover {
     transition: all 0.5s;
     right: -100%;
     background: #0000003d;
+    z-index: 1000;
   }
 
   .navlinks li {
@@ -132,3 +134,4 @@ li a.contact:hover {
     color: rgb(255, 31, 31);
   }
 }
+
