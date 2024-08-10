@@ -1,0 +1,39 @@
+/* Degradado de fondo para todo el body */
+body {
+    background: linear-gradient(to bottom, #e02319b1, #057ac2b4);
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    display: flex;
+    align-items:center;
+    justify-content:center;
+}
+
+/* Contenedor principal para alinear los elementos en columna */
+.container-mdr {
+    display: flex;
+    flex-direction: column; /* Alinea los elementos en una columna */
+    gap: 20px; /* Espacio entre el formulario y los resultados */
+}
+
+/* Ajusta el contenedor del formulario */
+.form-containerr {
+    width: 100%; /* Ocupa el ancho completo del contenedor */
+}
+
+/* Ajusta el contenedor de los resultados */
+.result-containerr {
+    width: 100%; /* Ocupa el ancho completo del contenedor */
+}
+
+/* Estilos generales
+.container-md {
+    padding: 20px;
+    background-color: rgba(255, 255, 255, 0.8);
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    position: relative;
+    z-index: 1;
+Agregar margen superior al contenedor de resultados 
+.result-container 
+    margin-top: 20px;

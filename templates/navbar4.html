@@ -1,0 +1,21 @@
+
+<head>
+    <meta http-equiv="X-UA-Compatible" content="IE-edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../static/assets/style/navbar.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.0/css/all.min.css">
+</head>
+    <nav>
+        <input type="checkbox" id="checkbox">
+        <label for="check" class="checkbtn">
+            <i class="fas fa-bars"></i>
+        </label>
+        
+        <ul>
+            <li><a class="active" href="{{url_for('base')}}">Inicio</a></li>
+            <a href="{{url_for('usuarios')}}">Usuarios</a>
+            <a href="{{url_for('productos')}}">Productos</a>
+            <a href="{{url_for('bodegas')}}">Bodegas</a>
+            <a href="{{url_for('reportes')}}">Reportes</a>
+        </ul>
+    </nav>

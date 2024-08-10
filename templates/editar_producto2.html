@@ -7,15 +7,14 @@
         {% endblock %}
     </title>
     <link rel="stylesheet" href="../static/assets/style/style.css">
+    <link rel="stylesheet" href="../static/assets/style/formularios.css">
+
 {% endblock %}
 
 {% block body %}
-    {% block navbar %}
-        {% include 'navbar2.html' %}
-    {% endblock %}
-
     <div class="main-content">
         {% block content %}
+        <div class="container-md">
         <div class="container mt-4">
             <h2>Editar Producto</h2>
             <form action="{{ url_for('editar_producto2') }}" method="post">
@@ -59,4 +58,5 @@
         </div>
         {% endblock %}
     </div>
+        </div>
 {% endblock %}

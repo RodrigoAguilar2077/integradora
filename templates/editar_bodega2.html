@@ -16,7 +16,7 @@
         <div class="container-md">
         <div class="container mt-4">
             <h2>Editar Bodega</h2>
-            <form action="{{ url_for('editar_bodega') }}" method="post">
+            <form action="{{ url_for('editar_bodega2') }}" method="post">
                 <input type="hidden" name="original_id_bodega" value="{{ id_bodega }}">
                 <div class="mb-3">
                     <label for="nombre_bodega" class="form-label">Nombre de la Bodega</label>
@@ -27,7 +27,7 @@
                     <input type="text" name="ubicacion" class="form-control" value="{{ ubicacion }}" required>
                 </div>
                 <button type="submit" class="btn btn-primary">Actualizar</button>
-                <a href="{{ url_for('bodegas') }}" class="btn btn-secondary">Cancelar</a>
+                <a href="{{ url_for('bodegas2') }}" class="btn btn-secondary">Cancelar</a>
             </form>
         </div>
         {% endblock %}

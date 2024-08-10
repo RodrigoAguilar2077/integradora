@@ -1,0 +1,8 @@
+.gradient-bg-body {
+    background: linear-gradient(to bottom, #e02319b1, #057ac2b4);
+    padding: 40px;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}

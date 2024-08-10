@@ -314,7 +314,7 @@ def eliminar_producto():
         conn = db.conectar()
         cursor = conn.cursor()
         cursor.execute('''
-            DELETE FROM producto
+            DELETE FROM productos
             WHERE id_producto = %s
         ''', (id_producto,))
         conn.commit()
@@ -588,7 +588,7 @@ def insertar_producto2():
     conn = db.conectar()
     cursor = conn.cursor()
 
-    cursor.execute("SELECT id_proveedor, nombre_proveedor FROM proveedores")
+    cursor.execute("SELECT id_proveedor, nombre_proveedor FROM proveedores ORDER BY nombre_proveedor")
     proveedores = cursor.fetchall()
     form.fk_proveedores.choices = [(proveedor[0], proveedor[1]) for proveedor in proveedores]
 
@@ -596,7 +596,7 @@ def insertar_producto2():
     bodegas = cursor.fetchall()
     form.fk_bodega.choices = [(bodega[0], bodega[1]) for bodega in bodegas]
 
-    cursor.execute("SELECT id_categoria, nombre FROM categoria")
+    cursor.execute("SELECT id_categoria, nombre FROM categoria ORDER BY nombre")
     categoria = cursor.fetchall()
     form.fk_categoria.choices = [(categoria[0], categoria[1]) for categoria in categoria]
 
@@ -644,7 +644,7 @@ def buscar_productos2():
     bodegas = cursor.fetchall()
     form.bodega.choices = [(bodega[0], bodega[1]) for bodega in bodegas]
 
-    cursor.execute("SELECT id_categoria, nombre FROM categoria")
+    cursor.execute("SELECT id_categoria, nombre FROM categoria ORDER BY nombre")
     categorias = cursor.fetchall()
     form.categoria.choices = [(categoria[0], categoria[1]) for categoria in categorias]
 
@@ -670,7 +670,7 @@ def buscar_productos2():
         cursor.close()
         db.desconectar(conn)
 
-    return render_template('buscar_productos2.html', form=form, productos=productos)
+    return render_template('buscar_producto2.html', form=form, productos=productos)
 
 @app.route('/bodegas2')
 def bodegas2():
@@ -681,6 +681,43 @@ def bodegas2():
     cursor.close()
     db.desconectar(conn)
     return render_template('bodegas2.html', datos=datos)
+
+@app.route('/editar_bodega2', methods=['GET', 'POST'])
+def editar_bodega2():
+    if request.method == 'POST':
+        try:
+            original_id_bodega = request.form['original_id_bodega']
+            nombre_bodega = request.form['nombre_bodega']
+            ubicacion = request.form['ubicacion']
+
+            conn = db.conectar()
+            cursor = conn.cursor()
+            cursor.execute('''
+                UPDATE bodega
+                SET nombre_bodega = %s, ubicacion = %s
+                WHERE id_bodega = %s
+            ''', (nombre_bodega, ubicacion, original_id_bodega))
+            conn.commit()
+            cursor.close()
+        except Exception as e:
+            print(f"Error al actualizar la bodega: {e}")
+            flash('Error al actualizar la bodega')
+        finally:
+            db.desconectar(conn)
+        
+        flash('Bodega actualizada correctamente')
+        return redirect(url_for('bodegas2'))
+    
+    else:
+        id_bodega = request.args.get('id_bodega')
+        nombre_bodega = request.args.get('nombre_bodega')
+        ubicacion = request.args.get('ubicacion')
+        
+        return render_template('editar_bodega2.html', 
+                                id_bodega=id_bodega, 
+                                nombre_bodega=nombre_bodega, 
+                                ubicacion=ubicacion)
+
 
 @app.route('/reportes2', methods=['GET', 'POST'])
 def reportes2():

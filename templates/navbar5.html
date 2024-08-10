@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menú</title>
+    <link rel="stylesheet" href="../static/assets/style/navbar.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.0/css/all.min.css" rel="stylesheet">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar navbar-inverse mi-nav" role="navigation">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">
+                <img src="../static/assets/sags.jpg" alt="SAGS" class="logo" style="height: 40px;">
+            </a>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <div class="navbar-nav">
+                    <a class="nav-link active" href="#">Inicio</a>
+                    <a class="nav-link" href="{{url_for('usuarios')}}">Usuarios</a>
+                    <a class="nav-link" href="{{url_for('productos')}}">Productos</a>
+                    <a class="nav-link" href="{{url_for('bodegas')}}">Bodegas</a>
+                    <a class="nav-link" href="{{url_for('reportes')}}">Reportes</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+</body>
+</html>

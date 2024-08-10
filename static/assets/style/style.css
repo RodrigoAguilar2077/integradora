@@ -1,6 +1,6 @@
 .mi-nav {
     font-size: 22px;
-    background-color: #343a40;
+    background-color: rgb(201, 19, 19); /* Cambiado a rojo */
 }
 
 .navbar-nav .nav-link {
@@ -22,8 +22,9 @@
 }
 
 .mi-nav .nav-link:hover {
-    color: #e23838;
+    color: #85bcfa;
 }
+
 
 /* Estilos generales */
 body.general-body {
@@ -46,6 +47,17 @@ body.general-body::before {
     height: 100%;
     z-index: -1;
 }
+
+.footer {
+    background-color: rgb(201, 19, 19);
+    padding: 10px 0;
+    font-size: 14px;
+}
+
+.footer .text-light {
+    color: #ffffff;
+}
+
 
 /* Estilos de la tabla */
 .container {
@@ -74,12 +86,11 @@ body.general-body::before {
     border: 3px solid #dee2e6;
 }
 
-/* Estilos específicos para la página de inicio */
+/* Estilos para la página de inicio */
 .container-md {
     padding: 20px;
-    background-color: rgba(255, 255, 255, 0.8);
     border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.108);
     position: relative;
     z-index: 1;
 }
@@ -87,7 +98,7 @@ body.general-body::before {
 img.img-fluid {
     max-width: 100%;
     height: auto;
-    z-index: 2;
+    z-index: 1;
 }
 
 h1 {

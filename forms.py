@@ -30,7 +30,7 @@ class RegisterForm(FlaskForm):
     nombre = StringField('Nombre', validators=[DataRequired()])
     apellido_paterno = StringField('Apellido Paterno', validators=[DataRequired()])
     apellido_materno = StringField('Apellido Materno', validators=[DataRequired()])
-    tipo_usuario = SelectField('Tipo de Usuario', choices=[('admin', 'Administrador'), ('user', 'Almacenista')], validators=[DataRequired()])
+    tipo_usuario = SelectField('Tipo de Usuario', choices=[('Administrador', 'Administrador'), ('Almacenista', 'Almacenista')], validators=[DataRequired()])
     nombre_de_usuario = StringField('Nombre de Usuario', validators=[DataRequired()])
     contraseña = PasswordField('Contraseña', validators=[DataRequired()])
     confirm_password = PasswordField('Confirmar Contraseña', validators=[DataRequired(), EqualTo('contraseña')])

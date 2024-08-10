@@ -9,7 +9,7 @@ function hideSidebar() {
 }
 
 function showMenu(menuClass) {
-    const menus = document.querySelectorAll('ul.usuarios, ul.productos, ul.proveedores, ul.bodega');
+    const menus = document.querySelectorAll('ul.usuarios, ul.productos, ul.reportes, ul.bodega');
     menus.forEach(menu => {
         if (menu.classList.contains(menuClass)) {
             menu.classList.toggle('hidden');
