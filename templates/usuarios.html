@@ -23,47 +23,49 @@
                 <a href="{{ url_for('insertar_usuario') }}" class="btn btn-primary">Insertar Usuario</a>
             </div>
             <div class="row">
-                <div class="col-md-12">
-                    <table class="table table-bordered table-hover table-sm">
-                        <thead class="thead-dark">
-                            <tr>
-                                <th scope="col">Nombre</th>
-                                <th scope="col">Tipo de Usuario</th>
-                                <th scope="col">Correo de usuario</th>
-                                <th scope="col">Contraseña</th>
-                                <th scope="col">Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for fila in datos %}
-                            <tr>
-                                <td>{{ fila[1] }}</td> <!-- nombre_completo -->
-                                <td>{{ fila[2] }}</td> <!-- tipo_usuario -->
-                                <td>{{ fila[3] }}</td> <!-- correo -->
-                                <td>{{ fila[4] }}</td> <!-- contrasena -->
-                                <td>
-                                    <a class="btn btn-primary btn-sm" href="{{ url_for('update1_usuario', id_usuario=fila[0]) }}">Editar</a>
-                                    <form action="{{ url_for('eliminar_usuario') }}" method="post" style="display:inline;">
-                                        <input type="hidden" name="id_usuario" value="{{ fila[0] }}">
-                                        <input type="submit" class="btn btn-danger btn-sm" value="Eliminar" onclick="return confirm('¿Estás seguro de que quieres eliminar este usuario?');">
-                                    </form>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+                <div class="table-responsive">
+                    <div class="col-md-12">
+                        <table class="table table-bordered table-hover table-sm">
+                            <thead class="thead-dark">
+                                <tr>
+                                    <th scope="col">Nombre</th>
+                                    <th scope="col">Tipo de Usuario</th>
+                                    <th scope="col">Correo de usuario</th>
+                                    <th scope="col">Contraseña</th>
+                                    <th scope="col">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for fila in datos %}
+                                <tr>
+                                    <td>{{ fila[1] }}</td> <!-- nombre_completo -->
+                                    <td>{{ fila[2] }}</td> <!-- tipo_usuario -->
+                                    <td>{{ fila[3] }}</td> <!-- correo -->
+                                    <td>{{ fila[4] }}</td> <!-- contrasena -->
+                                    <td>
+                                        <a class="btn btn-primary btn-sm" href="{{ url_for('update1_usuario', id_usuario=fila[0]) }}">Editar</a>
+                                        <form action="{{ url_for('eliminar_usuario') }}" method="post" style="display:inline;">
+                                            <input type="hidden" name="id_usuario" value="{{ fila[0] }}">
+                                            <input type="submit" class="btn btn-danger btn-sm" value="Eliminar" onclick="return confirm('¿Estás seguro de que quieres eliminar este usuario?');">
+                                        </form>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
         {% endblock %}
     </div>
 
-    {% block footer %}
+</body>
+{% block footer %}
     <footer class="footer mt-auto py-3">
         <div class="container-fluid text-center">
             <span class="text-light">VRAM© 2024 TODOS LOS DERECHOS RESERVADOS</span>
         </div>
     </footer>
     {% endblock %}
-</body>
 {% endblock %}

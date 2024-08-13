@@ -8,7 +8,7 @@
 body{
     width: 100vw;
     height: 100vh;
-    background-color: #21375f;
+    background-color: #d2d2d2;
     display: grid;
     justify-content: center;
     align-content: center;
@@ -25,7 +25,7 @@ body{
     display: grid;
     grid-template-columns: 1fr 1fr;
     border-radius: 3px solid #ff0000;
-    box-shadow: 0 0 50px 0 #bc0000;
+    box-shadow: 0 0 50px 0 #005ebc;
 }
 
 .banner{
@@ -66,11 +66,12 @@ body{
 
 .title{
     font-size: 35px;
+    color: #000000;
 }
 
 .inp{
     padding-bottom: 10px;
-    border-bottom: 2px solid #eee;
+    border-bottom: 2px solid #000000;
 }
 
 .input{
@@ -81,7 +82,7 @@ body{
     margin-top: 40px;
     padding-right: 10px;
     font-size: 17px;
-    color: rgb(255, 255, 255);
+    color: rgb(0, 0, 0);
 }
 
 .submit{
