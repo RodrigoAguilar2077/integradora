@@ -36,7 +36,7 @@ from psycopg2.extras import RealDictCursor
 # Ruta para el endpoint 'login_view'
 @app.route('/login')
 def login_view():
-    return render_template('login.html')
+    return render_template('login2.html')
 
 @app.route('/acceso-login', methods=["GET", "POST"])
 def login():
@@ -76,14 +76,14 @@ def login():
                 return redirect(url_for('login_view'))
         else:
             return redirect(url_for('login_view'))
-    return render_template('login.html')
+    return render_template('login2.html')
 
 @app.route('/admin')
 def admin():
     if session.get('logueado'):
         return render_template('base.html')
     else:
-        return render_template('login.html', mensaje="Acceso no autorizado")
+        return render_template('login2.html', mensaje="Acceso no autorizado")
     
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -279,26 +279,22 @@ def editar_producto(id_producto):
     if request.method == 'POST':
         if form.validate_on_submit():
             try:
-                # Datos del formulario
                 nombre = form.nombre.data
                 cantidad = form.cantidad.data
                 presentacion = form.presentacion.data
-                fk_bodega = form.fk_bodega.data  # ID de la bodega seleccionada
-                fk_marca = form.fk_marca.data    # ID de la marca seleccionada
-                fk_categoria = form.fk_categoria.data  # ID de la categoría seleccionada
+                fk_bodega = form.fk_bodega.data
+                fk_marca = form.fk_marca.data
+                fk_categoria = form.fk_categoria.data
 
-                # Imprimir valores para depuración
                 print(f"Datos recibidos: nombre={nombre}, cantidad={cantidad}, presentacion={presentacion}, "
                       f"fk_bodega={fk_bodega}, fk_marca={fk_marca}, fk_categoria={fk_categoria}")
 
-                # Actualizar la información del producto
                 cursor.execute('''
                     UPDATE productos
                     SET nombre = %s, cantidad = %s, presentacion = %s, fk_bodega = %s, fk_marca = %s, fk_categoria = %s
                     WHERE id_producto = %s
                 ''', (nombre, cantidad, presentacion, fk_bodega, fk_marca, fk_categoria, id_producto))
 
-                # Confirmar que la consulta se ejecutó
                 print(f"Consulta SQL ejecutada con éxito.")
 
                 conn.commit()
@@ -313,7 +309,6 @@ def editar_producto(id_producto):
             flash('Formulario no válido. Por favor, corrige los errores.')
             print("Formulario no válido.")
     else:
-        # Cargar datos del producto para el formulario
         cursor.execute('''
             SELECT nombre, cantidad, presentacion, fk_bodega, fk_marca, fk_categoria
             FROM productos
