@@ -21,41 +21,13 @@
         <div class="container mt-4">
             <h2>Lista de Productos</h2>
 
-            <!-- Formulario de Filtrado -->
-            <form method="get" action="{{ url_for('productos') }}" class="mb-3">
-                <div class="row">
-                    <div class="col-md-3">
-                        <input type="text" name="nombre" class="form-control" placeholder="Filtrar por nombre" value="{{ request.args.get('nombre', '') }}">
-                    </div>
-                    <div class="col-md-3">
-                        <input type="text" name="bodega" class="form-control" placeholder="Filtrar por bodega" value="{{ request.args.get('bodega', '') }}">
-                    </div>
-                    <div class="col-md-3">
-                        <input type="text" name="categoria" class="form-control" placeholder="Filtrar por categoría" value="{{ request.args.get('categoria', '') }}">
-                    </div>
-                    <div class="col-md-3">
-                        <input type="text" name="marca" class="form-control" placeholder="Filtrar por marca" value="{{ request.args.get('marca', '') }}">
-                    </div>
-                </div>
-                <button type="submit" class="btn btn-primary mt-3">Filtrar</button>
-            </form>
-
-            <!-- Opciones de Ordenación -->
-            <form method="get" action="{{ url_for('productos') }}" class="mb-3">
-                <div class="form-group">
-                    <label for="orden">Ordenar por:</label>
-                    <select name="orden" id="orden" class="form-control" onchange="this.form.submit()">
-                        <option value="id_producto" {% if request.args.get('orden') == 'id_producto' %}selected{% endif %}>ID Producto</option>
-                        <option value="nombre" {% if request.args.get('orden') == 'nombre' %}selected{% endif %}>Nombre</option>
-                        <option value="nombre_bodega" {% if request.args.get('orden') == 'nombre_bodega' %}selected{% endif %}>Bodega</option>
-                        <option value="categoria" {% if request.args.get('orden') == 'categoria' %}selected{% endif %}>Categoría</option>
-                        <option value="marca" {% if request.args.get('orden') == 'marca' %}selected{% endif %}>Marca</option>
-                    </select>
-                </div>
-            </form>
-
+            <!-- Formulario de búsqueda -->
             <div class="d-flex mb-3">
-                <a href="{{ url_for('insertar_producto') }}" class="btn btn-success">Insertar Producto</a>
+                <form class="form-inline" method="GET" action="{{ url_for('productos') }}">
+                    <input class="form-control mr-sm-2" type="search" name="nombre" placeholder="Buscar por nombre" aria-label="Buscar" value="{{ request.args.get('nombre', '') }}">
+                    <button class="btn btn-outline-primary" type="submit">Buscar</button>
+                </form>
+                <a href="{{ url_for('insertar_producto') }}" class="btn btn-success ml-3">Insertar Producto</a>
             </div>
 
             <div class="table-responsive">
@@ -105,5 +77,6 @@
             <span class="text-light">VRAM© 2024 TODOS LOS DERECHOS RESERVADOS</span>
         </div>
     </footer>
-    {% endblock footer %}
+{% endblock footer %}
 {% endblock body %}
+

@@ -229,20 +229,31 @@ def update2_usuario(id_usuario):
 
 @app.route('/productos')
 def productos():
+    nombre = request.args.get('nombre')  # Obtener el nombre del parámetro de búsqueda
     conn = db.conectar()
     cursor = conn.cursor()
 
-    # Consulta para obtener todos los productos sin paginación
-    cursor.execute('''
-        SELECT * FROM vista_productos
-        ORDER BY id_producto
-    ''')
+    if nombre:
+        # Si se proporciona un nombre, filtra los resultados
+        cursor.execute('''
+            SELECT * FROM vista_productos
+            WHERE nombre ILIKE %s
+            ORDER BY id_producto
+        ''', ('%' + nombre + '%',))
+    else:
+        # Si no se proporciona un nombre, muestra todos los productos
+        cursor.execute('''
+            SELECT * FROM vista_productos
+            ORDER BY id_producto
+        ''')
+    
     datos = cursor.fetchall()
 
     cursor.close()
     db.desconectar(conn)
 
     return render_template('productos.html', datos=datos)
+
 
 @app.route('/productos/total')
 def productos_total():
@@ -370,15 +381,15 @@ def insertar_producto():
     conn = db.conectar()
     cursor = conn.cursor()
 
-    cursor.execute("SELECT id_marca, nombre FROM marca")
+    cursor.execute("SELECT id_marca, nombre FROM marca ORDER BY nombre")
     marcas = cursor.fetchall()
     form.fk_marca.choices = [(marca[0], marca[1]) for marca in marcas]
 
-    cursor.execute("SELECT id_bodega, nombre_bodega FROM bodega")
+    cursor.execute("SELECT id_bodega, nombre FROM bodega ORDER BY nombre")
     bodegas = cursor.fetchall()
     form.fk_bodega.choices = [(bodega[0], bodega[1]) for bodega in bodegas]
 
-    cursor.execute("SELECT id_categoria, nombre FROM categoria")
+    cursor.execute("SELECT id_categoria, nombre FROM categoria ORDER BY nombre")
     categoria = cursor.fetchall()
     form.fk_categoria.choices = [(categoria[0], categoria[1]) for categoria in categoria]
 
@@ -388,7 +399,7 @@ def insertar_producto():
     if form.validate_on_submit():
         nombre = form.nombre.data
         cantidad = form.cantidad.data
-        presentacion = form.presentación.data
+        presentacion = form.presentacion.data
         fk_marca = form.fk_marca.data
         fk_bodega = form.fk_bodega.data
         fk_categoria=form.fk_categoria.data

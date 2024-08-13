@@ -12,7 +12,7 @@ class Sags1Form(FlaskForm):
 class Sags2Form(FlaskForm):
     nombre = StringField('Nombre', validators=[DataRequired()])
     cantidad = IntegerField('Cantidad', validators=[DataRequired()])
-    presentación = StringField('Presentación', validators=[DataRequired()])
+    presentacion = StringField('Presentación', validators=[DataRequired()])
     fk_bodega = SelectField('Bodega', choices=[], validators=[DataRequired()])
     fk_marca = SelectField('Marca', choices=[], validators=[DataRequired()])
     fk_categoria = SelectField('Categoria', choices=[], validators=[DataRequired()])
