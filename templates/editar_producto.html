@@ -15,9 +15,12 @@
     <div class="main-content2">
         {% block content %}
         <div class="container-md mt-4">
+            <div class="mb-3">
+                <a href="{{ url_for('productos') }}" class="btn btn-primary">Volver</a>
+            </div>
             <h2>Editar Producto</h2>
             <form method="post" action="{{ url_for('editar_producto', id_producto=id_producto) }}">
-                {{ form.hidden_tag() }} <!-- Agrega todos los campos ocultos de CSRF y otros -->
+                {{ form.hidden_tag() }}
 
                 <div class="mb-3">
                     {{ form.nombre.label(class="form-label") }}
@@ -58,3 +61,4 @@
         {% endblock %}
     </div>
 {% endblock %}
+

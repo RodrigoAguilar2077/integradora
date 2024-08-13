@@ -227,8 +227,6 @@ def update2_usuario(id_usuario):
         return redirect(url_for('usuarios'))
 
 
-
-
 @app.route('/productos')
 def productos():
     conn = db.conectar()
@@ -260,10 +258,23 @@ def productos_total():
     return render_template('productos_total.html', datos=datos)
 
 
-
 @app.route('/editar_producto/<int:id_producto>', methods=['GET', 'POST'])
 def editar_producto(id_producto):
     form = EditarProductoForm()
+
+    # Conectar a la base de datos
+    conn = db.conectar()
+    cursor = conn.cursor()
+
+    # Obtener opciones para los SelectField
+    cursor.execute('SELECT id_bodega, nombre FROM bodega ORDER BY nombre')
+    form.fk_bodega.choices = [(b[0], b[1]) for b in cursor.fetchall()]
+
+    cursor.execute('SELECT id_marca, nombre FROM marca ORDER BY nombre')
+    form.fk_marca.choices = [(m[0], m[1]) for m in cursor.fetchall()]
+
+    cursor.execute('SELECT id_categoria, nombre FROM categoria ORDER BY nombre')
+    form.fk_categoria.choices = [(c[0], c[1]) for c in cursor.fetchall()]
 
     if request.method == 'POST':
         if form.validate_on_submit():
@@ -272,12 +283,13 @@ def editar_producto(id_producto):
                 nombre = form.nombre.data
                 cantidad = form.cantidad.data
                 presentacion = form.presentacion.data
-                fk_bodega = form.fk_bodega.data
-                fk_marca = form.fk_marca.data
-                fk_categoria = form.fk_categoria.data
+                fk_bodega = form.fk_bodega.data  # ID de la bodega seleccionada
+                fk_marca = form.fk_marca.data    # ID de la marca seleccionada
+                fk_categoria = form.fk_categoria.data  # ID de la categoría seleccionada
 
-                conn = db.conectar()
-                cursor = conn.cursor()
+                # Imprimir valores para depuración
+                print(f"Datos recibidos: nombre={nombre}, cantidad={cantidad}, presentacion={presentacion}, "
+                      f"fk_bodega={fk_bodega}, fk_marca={fk_marca}, fk_categoria={fk_categoria}")
 
                 # Actualizar la información del producto
                 cursor.execute('''
@@ -285,11 +297,11 @@ def editar_producto(id_producto):
                     SET nombre = %s, cantidad = %s, presentacion = %s, fk_bodega = %s, fk_marca = %s, fk_categoria = %s
                     WHERE id_producto = %s
                 ''', (nombre, cantidad, presentacion, fk_bodega, fk_marca, fk_categoria, id_producto))
-                
-                conn.commit()
-                cursor.close()
-                db.desconectar(conn)
 
+                # Confirmar que la consulta se ejecutó
+                print(f"Consulta SQL ejecutada con éxito.")
+
+                conn.commit()
                 flash('Producto actualizado correctamente')
                 return redirect(url_for('productos'))
             
@@ -299,13 +311,9 @@ def editar_producto(id_producto):
                 return redirect(url_for('productos'))
         else:
             flash('Formulario no válido. Por favor, corrige los errores.')
-
+            print("Formulario no válido.")
     else:
         # Cargar datos del producto para el formulario
-        conn = db.conectar()
-        cursor = conn.cursor()
-        
-        # Obtener datos del producto
         cursor.execute('''
             SELECT nombre, cantidad, presentacion, fk_bodega, fk_marca, fk_categoria
             FROM productos
@@ -320,28 +328,19 @@ def editar_producto(id_producto):
             form.fk_bodega.data = producto[3]
             form.fk_marca.data = producto[4]
             form.fk_categoria.data = producto[5]
+            print(f"Producto encontrado: {producto}")
         else:
             flash('Producto no encontrado.')
+            print("Producto no encontrado.")
             return redirect(url_for('productos'))
 
-        # Obtener las opciones para los SelectField
-        cursor.execute('SELECT id_bodega, nombre FROM bodega ORDER BY nombre')
-        bodegas = [(b[0], b[1]) for b in cursor.fetchall()]
-
-        cursor.execute('SELECT id_marca, nombre FROM marca ORDER BY nombre')
-        marcas = [(m[0], m[1]) for m in cursor.fetchall()]
-
-        cursor.execute('SELECT id_categoria, nombre FROM categoria ORDER BY nombre')
-        categorias = [(c[0], c[1]) for c in cursor.fetchall()]
-
-        cursor.close()
-        db.desconectar(conn)
-
-        form.fk_bodega.choices = bodegas
-        form.fk_marca.choices = marcas
-        form.fk_categoria.choices = categorias
+    cursor.close()
+    db.desconectar(conn)
 
     return render_template('editar_producto.html', form=form, id_producto=id_producto)
+
+
+
 
 
 @app.route('/eliminar_producto', methods=['POST'])

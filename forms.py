@@ -33,13 +33,13 @@ class RegisterForm(FlaskForm):
     submit = SubmitField('Registrar')
 
 class EditarProductoForm(FlaskForm):
-        nombre = StringField('Nombre', validators=[DataRequired()])
-        cantidad = IntegerField('Cantidad', validators=[DataRequired()])
-        presentacion = StringField('Presentación', validators=[DataRequired()])
-        fk_bodega = SelectField('Bodega', choices=[], validators=[DataRequired()])
-        fk_marca = SelectField('Marca', choices=[], validators=[DataRequired()])
-        fk_categoria = SelectField('Categoría', choices=[], validators=[DataRequired()])
-        submit = SubmitField('Actualizar Producto')
+    nombre = StringField('Nombre', validators=[DataRequired()])
+    cantidad = IntegerField('Cantidad', validators=[DataRequired()])
+    presentacion = StringField('Presentación', validators=[DataRequired()])
+    fk_bodega = SelectField('Bodega', choices=[], validators=[DataRequired()], coerce=int)
+    fk_marca = SelectField('Marca', choices=[], validators=[DataRequired()], coerce=int)
+    fk_categoria = SelectField('Categoría', choices=[], validators=[DataRequired()], coerce=int)
+    submit = SubmitField('Actualizar Producto')
 
 class EliminarUsuarioForm(FlaskForm):
     nombre = StringField('Nombre')
