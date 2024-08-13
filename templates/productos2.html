@@ -1,4 +1,5 @@
 {% extends 'bootstrap/base.html' %}
+
 {% block head %}
     {{ super() }}
     <title>
@@ -19,21 +20,27 @@
         {% block content %}
         <div class="container mt-4">
             <h2>Lista de Productos</h2>
+
+            <!-- Formulario de búsqueda -->
             <div class="d-flex mb-3">
-                <a href="{{ url_for('buscar_productos2') }}" class="btn btn-secondary me-2">Buscar Productos</a>
-                <a href="{{ url_for('insertar_producto2') }}" class="btn btn-success">Insertar Producto</a>
+                <form class="form-inline" method="GET" action="{{ url_for('productos2') }}">
+                    <input class="form-control mr-sm-2" type="search" name="nombre" placeholder="Buscar por nombre" aria-label="Buscar" value="{{ request.args.get('nombre', '') }}">
+                    <button class="btn btn-info" type="submit">Buscar</button>
+                </form>
+                <a href="{{ url_for('insertar_producto2') }}" class="btn btn-success ml-3">Insertar Producto</a>
             </div>
+
             <div class="table-responsive">
                 <table class="table table-bordered table-hover table-sm">
                     <thead class="thead-dark">
                         <tr>
                             <th scope="col">ID Producto</th>
-                            <th scope="col">Nombre del Producto</th>
+                            <th scope="col">Producto</th>
                             <th scope="col">Cantidad</th>
                             <th scope="col">Presentación</th>
                             <th scope="col">Nombre de la Bodega</th>
-                            <th scope="col">Nombre del Proveedor</th>
                             <th scope="col">Categoría</th>
+                            <th scope="col">Marca</th>
                             <th scope="col">Acciones</th>
                         </tr>
                     </thead>
@@ -48,7 +55,7 @@
                             <td>{{ fila[5] }}</td>
                             <td>{{ fila[6] }}</td>
                             <td>
-                                <a href="{{ url_for('editar_producto2', id_producto=fila[0], nombre_producto=fila[1], cantidad=fila[2], presentacion=fila[3], nombre_bodega=fila[4], nombre_proveedor=fila[5], categoria=fila[6]) }}" class="btn btn-primary btn-sm">Editar</a>
+                                <a href="{{ url_for('editar_producto2', id_producto=fila[0]) }}" class="btn btn-primary btn-sm">Editar</a>
                             </td>
                         </tr>
                         {% endfor %}
@@ -56,16 +63,16 @@
                 </table>
             </div>
         </div>
-        {% endblock %}
+        {% endblock content %}
     </div>
 
-    {% block footer %}
+</body>
+{% block footer %}
     <footer class="footer mt-auto py-3">
         <div class="container-fluid text-center">
             <span class="text-light">VRAM© 2024 TODOS LOS DERECHOS RESERVADOS</span>
         </div>
     </footer>
-    {% endblock %}
-</body>
-{% endblock %}
+{% endblock footer %}
+{% endblock body %}
 

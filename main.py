@@ -563,66 +563,106 @@ def base_almacenista():
 
 @app.route('/productos2')
 def productos2():
+    nombre = request.args.get('nombre')  # Obtener el nombre del parámetro de búsqueda
     conn = db.conectar()
-    #crear un cursor (objeto para recorrer las tablas)
-
     cursor = conn.cursor()
-    #ejecutar un consulta en postgres
-    cursor.execute('''SELECT * FROM vista_productos ORDER BY id_producto''')
-    #recuperar la informacion
-    datos=cursor.fetchall()
-    #cerrar cursor y conexion a la base de datos
+
+    if nombre:
+        # Si se proporciona un nombre, filtra los resultados
+        cursor.execute('''
+            SELECT * FROM vista_productos
+            WHERE nombre ILIKE %s
+            ORDER BY id_producto
+        ''', ('%' + nombre + '%',))
+    else:
+        # Si no se proporciona un nombre, muestra todos los productos
+        cursor.execute('''
+            SELECT * FROM vista_productos
+            ORDER BY id_producto
+        ''')
+    
+    datos = cursor.fetchall()
+
     cursor.close()
     db.desconectar(conn)
+
     return render_template('productos2.html', datos=datos)
 
-@app.route('/editar_producto2', methods=['GET', 'POST'])
-def editar_producto2():
+@app.route('/editar_producto2/<int:id_producto>', methods=['GET', 'POST'])
+def editar_producto2(id_producto):
+    form = EditarProductoForm()
+
+    # Conectar a la base de datos
+    conn = db.conectar()
+    cursor = conn.cursor()
+
+    # Obtener opciones para los SelectField
+    cursor.execute('SELECT id_bodega, nombre FROM bodega ORDER BY nombre')
+    form.fk_bodega.choices = [(b[0], b[1]) for b in cursor.fetchall()]
+
+    cursor.execute('SELECT id_marca, nombre FROM marca ORDER BY nombre')
+    form.fk_marca.choices = [(m[0], m[1]) for m in cursor.fetchall()]
+
+    cursor.execute('SELECT id_categoria, nombre FROM categoria ORDER BY nombre')
+    form.fk_categoria.choices = [(c[0], c[1]) for c in cursor.fetchall()]
+
     if request.method == 'POST':
-        try:
-            original_id_producto = request.form['original_id_producto']
-            nombre_producto = request.form['nombre_producto']
-            cantidad = request.form['cantidad']
-            presentacion = request.form['presentacion']
-            fk_bodega = request.form['nombre_bodega']
-            nombre_proveedor = request.form['nombre_proveedor']
-            categoria = request.form['categoria']
+        if form.validate_on_submit():
+            try:
+                nombre = form.nombre.data
+                cantidad = form.cantidad.data
+                presentacion = form.presentacion.data
+                fk_bodega = form.fk_bodega.data
+                fk_marca = form.fk_marca.data
+                fk_categoria = form.fk_categoria.data
 
-            conn = db.conectar()
-            cursor = conn.cursor()
-            cursor.execute('''
-                UPDATE vista_productos
-                SET nombre_producto = %s, cantidad = %s, presentacion = %s, nombre_bodega = %s, nombre_proveedor = %s, categoria = %s
-                WHERE id_producto = %s
-            ''', (nombre_producto, cantidad, presentacion, nombre_bodega, nombre_proveedor, categoria, original_id_producto))
-            conn.commit()
-            cursor.close()
-            db.desconectar(conn)
+                print(f"Datos recibidos: nombre={nombre}, cantidad={cantidad}, presentacion={presentacion}, "
+                      f"fk_bodega={fk_bodega}, fk_marca={fk_marca}, fk_categoria={fk_categoria}")
 
-            flash('Producto actualizado correctamente')
-            return redirect(url_for('productos'))
+                cursor.execute('''
+                    UPDATE productos
+                    SET nombre = %s, cantidad = %s, presentacion = %s, fk_bodega = %s, fk_marca = %s, fk_categoria = %s
+                    WHERE id_producto = %s
+                ''', (nombre, cantidad, presentacion, fk_bodega, fk_marca, fk_categoria, id_producto))
 
-        except Exception as e:
-            print(f"Error al actualizar el producto: {e}")
-            flash('Error al actualizar el producto')
-            return redirect(url_for('productos'))
+                print(f"Consulta SQL ejecutada con éxito.")
+
+                conn.commit()
+                flash('Producto actualizado correctamente')
+                return redirect(url_for('productos'))
+            
+            except Exception as e:
+                print(f"Error al actualizar el producto: {e}")
+                flash('Error al actualizar el producto')
+                return redirect(url_for('productos'))
+        else:
+            flash('Formulario no válido. Por favor, corrige los errores.')
+            print("Formulario no válido.")
     else:
-        id_producto = request.args.get('id_producto')
-        nombre_producto = request.args.get('nombre_producto')
-        cantidad = request.args.get('cantidad')
-        presentacion = request.args.get('presentacion')
-        nombre_bodega = request.args.get('nombre_bodega')
-        nombre_proveedor = request.args.get('nombre_proveedor')
-        categoria = request.args.get('categoria')
+        cursor.execute('''
+            SELECT nombre, cantidad, presentacion, fk_bodega, fk_marca, fk_categoria
+            FROM productos
+            WHERE id_producto = %s
+        ''', (id_producto,))
+        producto = cursor.fetchone()
 
-        return render_template('editar_producto2.html',
-                                id_producto=id_producto,
-                                nombre_producto=nombre_producto,
-                                cantidad=cantidad,
-                                presentacion=presentacion,
-                                nombre_bodega=nombre_bodega,
-                                nombre_proveedor=nombre_proveedor,
-                                categoria=categoria)
+        if producto:
+            form.nombre.data = producto[0]
+            form.cantidad.data = producto[1]
+            form.presentacion.data = producto[2]
+            form.fk_bodega.data = producto[3]
+            form.fk_marca.data = producto[4]
+            form.fk_categoria.data = producto[5]
+            print(f"Producto encontrado: {producto}")
+        else:
+            flash('Producto no encontrado.')
+            print("Producto no encontrado.")
+            return redirect(url_for('productos2'))
+
+    cursor.close()
+    db.desconectar(conn)
+
+    return render_template('editar_producto2.html', form=form, id_producto=id_producto)
 
 @app.route('/insertar_producto2', methods=['GET', 'POST'])
 def insertar_producto2():
@@ -631,11 +671,11 @@ def insertar_producto2():
     conn = db.conectar()
     cursor = conn.cursor()
 
-    cursor.execute("SELECT id_proveedor, nombre_proveedor FROM proveedores ORDER BY nombre_proveedor")
-    proveedores = cursor.fetchall()
-    form.fk_proveedores.choices = [(proveedor[0], proveedor[1]) for proveedor in proveedores]
+    cursor.execute("SELECT id_marca, nombre FROM marca ORDER BY nombre")
+    marcas = cursor.fetchall()
+    form.fk_marca.choices = [(marca[0], marca[1]) for marca in marcas]
 
-    cursor.execute("SELECT id_bodega, nombre_bodega FROM bodega")
+    cursor.execute("SELECT id_bodega, nombre FROM bodega ORDER BY nombre")
     bodegas = cursor.fetchall()
     form.fk_bodega.choices = [(bodega[0], bodega[1]) for bodega in bodegas]
 
@@ -649,20 +689,20 @@ def insertar_producto2():
     if form.validate_on_submit():
         nombre = form.nombre.data
         cantidad = form.cantidad.data
-        presentación = form.presentación.data
-        fk_proveedores = form.fk_proveedores.data
+        presentacion = form.presentacion.data
+        fk_marca = form.fk_marca.data
         fk_bodega = form.fk_bodega.data
         fk_categoria=form.fk_categoria.data
 
-        print(f"Nombre: {nombre}, Cantidad: {cantidad}, Presentación: {presentación}, Proveedor: {fk_proveedores}, Bodega: {fk_bodega}, Categoria: {fk_categoria} ")
+        print(f"Nombre: {nombre}, Cantidad: {cantidad}, Presentación: {presentacion}, Marca: {fk_marca}, Bodega: {fk_bodega}, Categoria: {fk_categoria} ")
 
         conn = db.conectar()
         cursor = conn.cursor()
         try:
             cursor.execute('''
-            INSERT INTO productos (nombre, cantidad, presentación, fk_proveedores, fk_bodega, fk_categoria)
+            INSERT INTO productos (nombre, cantidad, presentacion, fk_marca, fk_bodega, fk_categoria)
             VALUES (%s, %s, %s, %s, %s, %s)
-            ''', (nombre, cantidad, presentación, fk_proveedores, fk_bodega, fk_categoria))
+            ''', (nombre, cantidad, presentacion, fk_marca, fk_bodega, fk_categoria))
             conn.commit()
             flash('Producto añadido correctamente')
         except Exception as e:
@@ -672,9 +712,9 @@ def insertar_producto2():
             cursor.close()
             db.desconectar(conn)
 
-        return redirect(url_for('productos'))
+        return redirect(url_for('productos2'))
 
-    return render_template('insertar_producto2.html', form=form)
+    return render_template('insertar_producto.html', form=form)
 
 @app.route('/buscar_productos2', methods=['GET', 'POST'])
 def buscar_productos2():
@@ -737,9 +777,9 @@ def editar_bodega2():
             cursor = conn.cursor()
             cursor.execute('''
                 UPDATE bodega
-                SET nombre_bodega = %s, ubicacion = %s
+                SET nombre = %s, ubicacion = %s
                 WHERE id_bodega = %s
-            ''', (nombre_bodega, ubicacion, original_id_bodega))
+            ''', (nombre, ubicacion, original_id_bodega))
             conn.commit()
             cursor.close()
         except Exception as e:
@@ -753,12 +793,12 @@ def editar_bodega2():
     
     else:
         id_bodega = request.args.get('id_bodega')
-        nombre_bodega = request.args.get('nombre_bodega')
+        nombre = request.args.get('nombre')
         ubicacion = request.args.get('ubicacion')
         
         return render_template('editar_bodega2.html', 
                                 id_bodega=id_bodega, 
-                                nombre_bodega=nombre_bodega, 
+                                nombre=nombre, 
                                 ubicacion=ubicacion)
 
 
@@ -772,7 +812,7 @@ def reportes2():
     cursor.execute('''
         SELECT nombre, cantidad
         FROM productos
-        WHERE fk_bodega = (SELECT id_bodega FROM bodega WHERE nombre_bodega = %s);
+        WHERE fk_bodega = (SELECT id_bodega FROM bodega WHERE nombre = %s);
     ''', (bodega,))
     
     productos = cursor.fetchall()
