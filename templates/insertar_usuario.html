@@ -22,28 +22,20 @@
         <form action="{{ url_for('insertar_usuario') }}" method="post">
             {{ form.hidden_tag() }}
             <div class="form-group">
-                {{ form.nombre.label(class="form-control-label") }}
-                {{ form.nombre(class="form-control") }}
-            </div>
-            <div class="form-group">
-                {{ form.apellido_paterno.label(class="form-control-label") }}
-                {{ form.apellido_paterno(class="form-control") }}
-            </div>
-            <div class="form-group">
-                {{ form.apellido_materno.label(class="form-control-label") }}
-                {{ form.apellido_materno(class="form-control") }}
+                {{ form.nombre_completo.label(class="form-control-label") }}
+                {{ form.nombre_completo(class="form-control") }}
             </div>
             <div class="form-group">
                 {{ form.tipo_usuario.label(class="form-control-label") }}
                 {{ form.tipo_usuario(class="form-control") }}
             </div>
             <div class="form-group">
-                {{ form.nombre_de_usuario.label(class="form-control-label") }}
-                {{ form.nombre_de_usuario(class="form-control") }}
+                {{ form.correo.label(class="form-control-label") }}
+                {{ form.correo(class="form-control") }}
             </div>
             <div class="form-group">
-                {{ form.contraseña.label(class="form-control-label") }}
-                {{ form.contraseña(class="form-control") }}
+                {{ form.contrasena.label(class="form-control-label") }}
+                {{ form.contrasena(class="form-control") }}
             </div>
             <div class="form-group text-center">
                 {{ form.submit(class="btn btn-primary btn-block") }}

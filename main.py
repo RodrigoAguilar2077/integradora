@@ -10,6 +10,7 @@ from forms import Sags2Form
 from forms import SearchForm
 from forms import RegisterForm
 from forms import EditarProductoForm
+from forms import EliminarUsuarioForm
 
 app = Flask(__name__)
 bootstrap = Bootstrap(app)
@@ -51,7 +52,7 @@ def login():
             conn = db.conectar()  # Conexión a la base de datos usando tu método
             cursor = conn.cursor(cursor_factory=RealDictCursor)
             cursor.execute('''
-                SELECT * FROM usuarios WHERE usuario_usuario = %s AND contrasena_usuario = %s
+                SELECT * FROM usuarios WHERE correo = %s AND contrasena = %s
             ''', (_correo, _password))
             cuenta = cursor.fetchone()
 
@@ -90,18 +91,16 @@ def register():
     form = RegisterForm()
     if form.validate_on_submit():
         nombre = form.nombre.data
-        apellido_paterno = form.apellido_paterno.data
-        apellido_materno = form.apellido_materno.data
         tipo_usuario = form.tipo_usuario.data
-        nombre_de_usuario = form.nombre_de_usuario.data
+        correo = form.nombre.data
         contraseña = form.contraseña.data
 
         conn = db.conectar()
         cursor = conn.cursor()
         cursor.execute('''
-        INSERT INTO vista_usuarios (nombre, apellido_paterno, apellido_materno, tipo_usuario, nombre_de_usuario, contraseña)
-        VALUES (%s, %s, %s, %s, %s, %s)
-        ''', (nombre, apellido_paterno, apellido_materno, tipo_usuario, nombre_de_usuario, contraseña))
+        INSERT INTO vista_usuarios (nombre, tipo_usuario, correo, contraseña)
+        VALUES (%s, %s, %s, %s)
+        ''', (nombre, tipo_usuario, correo, contraseña))
         conn.commit()
         cursor.close()
         db.desconectar(conn)
@@ -127,7 +126,7 @@ def usuarios():
 
     cursor = conn.cursor()
     #ejecutar un consulta en postgres
-    cursor.execute('''SELECT * FROM vista_usuarios ORDER BY nombre''')
+    cursor.execute('''SELECT * FROM usuarios ORDER BY nombre_completo''')
     #recuperar la informacion
     datos=cursor.fetchall()
     #cerrar cursor y conexion a la base de datos
@@ -139,19 +138,17 @@ def usuarios():
 def insertar_usuario():
     form = Sags1Form()
     if form.validate_on_submit():
-        nombre = form.nombre.data
-        apellido_paterno = form.apellido_paterno.data
-        apellido_materno = form.apellido_materno.data
+        nombre_completo = form.nombre_completo.data
         tipo_usuario = form.tipo_usuario.data
-        nombre_de_usuario = form.nombre_de_usuario.data
-        contraseña = form.contraseña.data
+        correo = form.correo.data
+        contrasena = form.contrasena.data
         
         conn = db.conectar()
         cursor = conn.cursor()
         cursor.execute('''
-        INSERT INTO vista_usuarios (nombre, apellido_paterno, apellido_materno, tipo_usuario, nombre_de_usuario, contraseña)
-        VALUES (%s, %s, %s, %s, %s, %s)
-        ''', (nombre, apellido_paterno, apellido_materno, tipo_usuario, nombre_de_usuario, contraseña))
+        INSERT INTO usuarios (nombre_completo, tipo_usuario, correo, contrasena)
+        VALUES (%s, %s, %s, %s)
+        ''', (nombre_completo, tipo_usuario, correo, contrasena))
         conn.commit()
         cursor.close()
         db.desconectar(conn)
@@ -165,18 +162,14 @@ def insertar_usuario():
 @app.route('/eliminar_usuario', methods=['POST'])
 def eliminar_usuario():
     try:
-        nombre = request.form['nombre']
-        apellido_paterno = request.form['apellido_paterno']
-        apellido_materno = request.form['apellido_materno']
-        tipo_usuario = request.form['tipo_usuario']
-        nombre_usuario = request.form['nombre_usuario']
+        id_usuario = request.form['id_usuario']
 
         conn = db.conectar()
         cursor = conn.cursor()
         cursor.execute('''
-            DELETE FROM vista_usuarios 
-            WHERE nombre = %s AND apellido_paterno = %s AND apellido_materno = %s AND tipo_usuario = %s AND nombre_de_usuario = %s
-        ''', (nombre, apellido_paterno, apellido_materno, tipo_usuario, nombre_usuario))
+            DELETE FROM usuarios 
+            WHERE id_usuario = %s
+        ''', (id_usuario,))
         conn.commit()
         cursor.close()
         db.desconectar(conn)
@@ -190,85 +183,68 @@ def eliminar_usuario():
         return redirect(url_for('usuarios'))
 
 
-@app.route('/editar_usuario', methods=['GET', 'POST'])
-def editar_usuario():
-    if request.method == 'POST':
-        try:
-            original_nombre = request.form['original_nombre']
-            original_apellido_paterno = request.form['original_apellido_paterno']
-            original_apellido_materno = request.form['original_apellido_materno']
-            original_tipo_usuario = request.form['original_tipo_usuario']
-            original_nombre_usuario = request.form['original_nombre_usuario']
+@app.route('/editar1_usuario/<int:id_usuario>', methods=['GET'])
+def update1_usuario(id_usuario):
+    conn = db.conectar()
+    cursor = conn.cursor()
 
-            nombre = request.form['nombre']
-            apellido_paterno = request.form['apellido_paterno']
-            apellido_materno = request.form['apellido_materno']
-            tipo_usuario = request.form['tipo_usuario']
-            nombre_usuario = request.form['nombre_usuario']
-            contraseña = request.form['contraseña']
+    # Recuperar los datos del usuario seleccionado
+    cursor.execute('''SELECT * FROM usuarios WHERE id_usuario=%s''', (id_usuario,))
+    datos = cursor.fetchone()
+    cursor.close()
+    db.desconectar(conn)
 
-            conn = db.conectar()
-            cursor = conn.cursor()
-            cursor.execute('''
-                UPDATE vista_usuarios
-                SET nombre = %s, apellido_paterno = %s, apellido_materno = %s, tipo_usuario = %s, nombre_de_usuario = %s, contraseña = %s
-                WHERE nombre = %s AND apellido_paterno = %s AND apellido_materno = %s AND tipo_usuario = %s AND nombre_de_usuario = %s
-            ''', (nombre, apellido_paterno, apellido_materno, tipo_usuario, nombre_usuario, contraseña, 
-                  original_nombre, original_apellido_paterno, original_apellido_materno, original_tipo_usuario, original_nombre_usuario))
-            conn.commit()
-            cursor.close()
-            db.desconectar(conn)
+    return render_template('editar_usuario.html', datos=datos)
 
-            flash('Usuario actualizado correctamente')
-            return redirect(url_for('usuarios'))
+@app.route('/editar2_usuario/<int:id_usuario>', methods=['POST'])
+def update2_usuario(id_usuario):
+    try:
+        nombre_completo = request.form['nombre_completo']
+        tipo_usuario = request.form['tipo_usuario']
+        correo = request.form['correo']
+        contrasena = request.form['contrasena']
 
-        except Exception as e:
-            print(f"Error al actualizar el usuario: {e}")
-            flash('Error al actualizar el usuario')
-            return redirect(url_for('usuarios'))
+        conn = db.conectar()
+        cursor = conn.cursor()
 
-    else:
-        nombre = request.args.get('nombre')
-        apellido_paterno = request.args.get('apellido_paterno')
-        apellido_materno = request.args.get('apellido_materno')
-        tipo_usuario = request.args.get('tipo_usuario')
-        nombre_usuario = request.args.get('nombre_usuario')
+        # Actualizar los datos del usuario
+        cursor.execute('''
+            UPDATE usuarios
+            SET nombre_completo = %s, tipo_usuario = %s, correo = %s, contrasena = %s
+            WHERE id_usuario = %s
+        ''', (nombre_completo, tipo_usuario, correo, contrasena, id_usuario))
+        
+        conn.commit()
+        cursor.close()
+        db.desconectar(conn)
 
-        return render_template('editar_usuario.html',
-                               nombre=nombre,
-                               apellido_paterno=apellido_paterno,
-                               apellido_materno=apellido_materno,
-                               tipo_usuario=tipo_usuario,
-                               nombre_usuario=nombre_usuario)
+        flash('Usuario actualizado correctamente')
+        return redirect(url_for('usuarios'))
+
+    except Exception as e:
+        print(f"Error al actualizar el usuario: {e}")
+        flash('Error al actualizar el usuario')
+        return redirect(url_for('usuarios'))
+
 
 
 
 @app.route('/productos')
 def productos():
-      # Obtiene la página actual del parámetro de consulta, por defecto es 1
-    page = request.args.get('page', 1, type=int)
-    per_page = 10  # Número de productos por página
-    offset = (page - 1) * per_page
-
     conn = db.conectar()
     cursor = conn.cursor()
 
-    # Consulta para obtener los productos paginados
+    # Consulta para obtener todos los productos sin paginación
     cursor.execute('''
         SELECT * FROM vista_productos
         ORDER BY id_producto
-        LIMIT %s OFFSET %s
-    ''', (per_page, offset))
+    ''')
     datos = cursor.fetchall()
-
-    # Consulta para contar el total de productos
-    cursor.execute('SELECT COUNT(*) FROM vista_productos')
-    total = cursor.fetchone()[0]
 
     cursor.close()
     db.desconectar(conn)
 
-    return render_template('productos.html', datos=datos, page=page, per_page=per_page, total=total)
+    return render_template('productos.html', datos=datos)
 
 @app.route('/productos/total')
 def productos_total():
@@ -283,6 +259,8 @@ def productos_total():
     
     return render_template('productos_total.html', datos=datos)
 
+
+
 @app.route('/editar_producto/<int:id_producto>', methods=['GET', 'POST'])
 def editar_producto(id_producto):
     form = EditarProductoForm()
@@ -293,9 +271,9 @@ def editar_producto(id_producto):
                 # Datos del formulario
                 nombre = form.nombre.data
                 cantidad = form.cantidad.data
-                presentación = form.presentación.data
+                presentacion = form.presentacion.data
                 fk_bodega = form.fk_bodega.data
-                fk_proveedores = form.fk_proveedores.data
+                fk_marca = form.fk_marca.data
                 fk_categoria = form.fk_categoria.data
 
                 conn = db.conectar()
@@ -304,9 +282,9 @@ def editar_producto(id_producto):
                 # Actualizar la información del producto
                 cursor.execute('''
                     UPDATE productos
-                    SET nombre = %s, cantidad = %s, presentación = %s, fk_bodega = %s, fk_proveedores = %s, fk_categoria = %s
+                    SET nombre = %s, cantidad = %s, presentacion = %s, fk_bodega = %s, fk_marca = %s, fk_categoria = %s
                     WHERE id_producto = %s
-                ''', (nombre, cantidad, presentación, fk_bodega, fk_proveedores, fk_categoria, id_producto))
+                ''', (nombre, cantidad, presentacion, fk_bodega, fk_marca, fk_categoria, id_producto))
                 
                 conn.commit()
                 cursor.close()
@@ -329,7 +307,7 @@ def editar_producto(id_producto):
         
         # Obtener datos del producto
         cursor.execute('''
-            SELECT nombre, cantidad, presentación, fk_bodega, fk_proveedores, fk_categoria
+            SELECT nombre, cantidad, presentacion, fk_bodega, fk_marca, fk_categoria
             FROM productos
             WHERE id_producto = %s
         ''', (id_producto,))
@@ -338,35 +316,32 @@ def editar_producto(id_producto):
         if producto:
             form.nombre.data = producto[0]
             form.cantidad.data = producto[1]
-            form.presentación.data = producto[2]
+            form.presentacion.data = producto[2]
             form.fk_bodega.data = producto[3]
-            form.fk_proveedores.data = producto[4]
+            form.fk_marca.data = producto[4]
             form.fk_categoria.data = producto[5]
         else:
             flash('Producto no encontrado.')
             return redirect(url_for('productos'))
 
         # Obtener las opciones para los SelectField
-        cursor.execute('SELECT id_bodega, nombre_bodega FROM bodega')
+        cursor.execute('SELECT id_bodega, nombre FROM bodega ORDER BY nombre')
         bodegas = [(b[0], b[1]) for b in cursor.fetchall()]
 
-        cursor.execute('SELECT id_proveedor, nombre_proveedor FROM proveedores')
-        proveedores = [(p[0], p[1]) for p in cursor.fetchall()]
+        cursor.execute('SELECT id_marca, nombre FROM marca ORDER BY nombre')
+        marcas = [(m[0], m[1]) for m in cursor.fetchall()]
 
-        cursor.execute('SELECT id_categoria, nombre FROM categoria')
+        cursor.execute('SELECT id_categoria, nombre FROM categoria ORDER BY nombre')
         categorias = [(c[0], c[1]) for c in cursor.fetchall()]
 
         cursor.close()
         db.desconectar(conn)
 
         form.fk_bodega.choices = bodegas
-        form.fk_proveedores.choices = proveedores
+        form.fk_marca.choices = marcas
         form.fk_categoria.choices = categorias
 
     return render_template('editar_producto.html', form=form, id_producto=id_producto)
-
-
-
 
 
 @app.route('/eliminar_producto', methods=['POST'])
@@ -401,9 +376,9 @@ def insertar_producto():
     conn = db.conectar()
     cursor = conn.cursor()
 
-    cursor.execute("SELECT id_proveedor, nombre_proveedor FROM proveedores")
-    proveedores = cursor.fetchall()
-    form.fk_proveedores.choices = [(proveedor[0], proveedor[1]) for proveedor in proveedores]
+    cursor.execute("SELECT id_marca, nombre FROM marca")
+    marcas = cursor.fetchall()
+    form.fk_marca.choices = [(marca[0], marca[1]) for marca in marcas]
 
     cursor.execute("SELECT id_bodega, nombre_bodega FROM bodega")
     bodegas = cursor.fetchall()
@@ -419,20 +394,20 @@ def insertar_producto():
     if form.validate_on_submit():
         nombre = form.nombre.data
         cantidad = form.cantidad.data
-        presentación = form.presentación.data
-        fk_proveedores = form.fk_proveedores.data
+        presentacion = form.presentación.data
+        fk_marca = form.fk_marca.data
         fk_bodega = form.fk_bodega.data
         fk_categoria=form.fk_categoria.data
 
-        print(f"Nombre: {nombre}, Cantidad: {cantidad}, Presentación: {presentación}, Proveedor: {fk_proveedores}, Bodega: {fk_bodega}, Categoria: {fk_categoria} ")
+        print(f"Nombre: {nombre}, Cantidad: {cantidad}, Presentación: {presentacion}, Marca: {fk_marca}, Bodega: {fk_bodega}, Categoria: {fk_categoria} ")
 
         conn = db.conectar()
         cursor = conn.cursor()
         try:
             cursor.execute('''
-            INSERT INTO productos (nombre, cantidad, presentación, fk_proveedores, fk_bodega, fk_categoria)
+            INSERT INTO productos (nombre, cantidad, presentacion, fk_marca, fk_bodega, fk_categoria)
             VALUES (%s, %s, %s, %s, %s, %s)
-            ''', (nombre, cantidad, presentación, fk_proveedores, fk_bodega, fk_categoria))
+            ''', (nombre, cantidad, presentacion, fk_marca, fk_bodega, fk_categoria))
             conn.commit()
             flash('Producto añadido correctamente')
         except Exception as e:
@@ -473,7 +448,7 @@ def buscar_productos():
         conn = db.conectar()
         cursor = conn.cursor()
         cursor.execute('''
-        SELECT p.id_producto, p.nombre, p.cantidad, p.presentación, b.nombre_bodega, c.nombre
+        SELECT p.id_producto, p.nombre, p.cantidad, p.presentacion, b.nombre_bodega, c.nombre
         FROM productos p
         JOIN bodega b ON p.fk_bodega = b.id_bodega
         JOIN categoria c ON p.fk_categoria = c.id_categoria
@@ -566,7 +541,7 @@ def reportes():
     cursor.execute('''
         SELECT nombre, cantidad
         FROM productos
-        WHERE fk_bodega = (SELECT id_bodega FROM bodega WHERE nombre_bodega = %s);
+        WHERE fk_bodega = (SELECT id_bodega FROM bodega WHERE nombre = %s);
     ''', (bodega,))
     
     productos = cursor.fetchall()
@@ -604,7 +579,7 @@ def editar_producto2():
             nombre_producto = request.form['nombre_producto']
             cantidad = request.form['cantidad']
             presentacion = request.form['presentacion']
-            nombre_bodega = request.form['nombre_bodega']
+            fk_bodega = request.form['nombre_bodega']
             nombre_proveedor = request.form['nombre_proveedor']
             categoria = request.form['categoria']
 
