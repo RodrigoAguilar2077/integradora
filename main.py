@@ -123,18 +123,19 @@ def error404(error):
 
 @app.route('/usuarios')
 def usuarios():
+    show_modal = request.args.get('show_modal')
+    
     conn = db.conectar()
-    #crear un cursor (objeto para recorrer las tablas)
-
     cursor = conn.cursor()
-    #ejecutar un consulta en postgres
     cursor.execute('''SELECT * FROM usuarios ORDER BY nombre_completo''')
-    #recuperar la informacion
-    datos=cursor.fetchall()
-    #cerrar cursor y conexion a la base de datos
+    datos = cursor.fetchall()
     cursor.close()
     db.desconectar(conn)
-    return render_template('usuarios.html', datos=datos)
+    
+    return render_template('usuarios.html', datos=datos, show_modal=show_modal)
+
+
+
 
 @app.route('/insertar_usuario', methods=['GET', 'POST'])
 def insertar_usuario():
@@ -156,7 +157,7 @@ def insertar_usuario():
         db.desconectar(conn)
         
         flash('Usuario añadido correctamente')
-        return redirect(url_for('usuarios'))
+        return redirect(url_for('usuarios', show_modal='insert'))
 
     return render_template('insertar_usuario.html', form=form)
 
@@ -169,7 +170,7 @@ def eliminar_usuario():
         conn = db.conectar()
         cursor = conn.cursor()
         cursor.execute('''
-            DELETE FROM usuarios 
+            DELETE FROM usuarios
             WHERE id_usuario = %s
         ''', (id_usuario,))
         conn.commit()
@@ -177,12 +178,13 @@ def eliminar_usuario():
         db.desconectar(conn)
 
         flash('Usuario eliminado correctamente')
-        return redirect(url_for('usuarios'))
+        return redirect(url_for('usuarios', show_modal='delete'))
 
     except Exception as e:
         print(f"Error al eliminar el usuario: {e}")
         flash('Error al eliminar el usuario')
-        return redirect(url_for('usuarios'))
+        return redirect(url_for('usuarios', show_modal='error'))
+
 
 
 @app.route('/editar1_usuario/<int:id_usuario>', methods=['GET'])
@@ -232,6 +234,8 @@ def update2_usuario(id_usuario):
 @app.route('/productos')
 def productos():
     nombre = request.args.get('nombre')  # Obtener el nombre del parámetro de búsqueda
+    show_modal = request.args.get('show_modal')
+    
     conn = db.conectar()
     cursor = conn.cursor()
 
@@ -254,7 +258,7 @@ def productos():
     cursor.close()
     db.desconectar(conn)
 
-    return render_template('productos.html', datos=datos)
+    return render_template('productos.html', datos=datos, show_modal=show_modal)
 
 
 @app.route('/productos/total')
@@ -367,12 +371,12 @@ def eliminar_producto():
         db.desconectar(conn)
 
         flash('Producto eliminado correctamente')
-        return redirect(url_for('productos'))
+        return redirect(url_for('productos', show_modal='delete'))
 
     except Exception as e:
         print(f"Error al eliminar el producto: {e}")
         flash('Error al eliminar el producto')
-        return redirect(url_for('productos'))
+        return redirect(url_for('productos', show_modal='error'))
 
 
 
@@ -404,9 +408,9 @@ def insertar_producto():
         presentacion = form.presentacion.data
         fk_marca = form.fk_marca.data
         fk_bodega = form.fk_bodega.data
-        fk_categoria=form.fk_categoria.data
+        fk_categoria = form.fk_categoria.data
 
-        print(f"Nombre: {nombre}, Cantidad: {cantidad}, Presentación: {presentacion}, Marca: {fk_marca}, Bodega: {fk_bodega}, Categoria: {fk_categoria} ")
+        print(f"Nombre: {nombre}, Cantidad: {cantidad}, Presentación: {presentacion}, Marca: {fk_marca}, Bodega: {fk_bodega}, Categoria: {fk_categoria}")
 
         conn = db.conectar()
         cursor = conn.cursor()
@@ -417,6 +421,7 @@ def insertar_producto():
             ''', (nombre, cantidad, presentacion, fk_marca, fk_bodega, fk_categoria))
             conn.commit()
             flash('Producto añadido correctamente')
+            return redirect(url_for('productos', show_modal='insert'))
         except Exception as e:
             conn.rollback()
             flash(f'Error al añadir el producto: {str(e)}')
@@ -424,9 +429,10 @@ def insertar_producto():
             cursor.close()
             db.desconectar(conn)
 
-        return redirect(url_for('productos'))
+        return redirect(url_for('productos', show_modal='error'))
 
     return render_template('insertar_producto.html', form=form)
+
 
 @app.route('/buscar_productos', methods=['GET', 'POST'])
 def buscar_productos():
@@ -558,7 +564,6 @@ def reportes():
     conn.close()
 
     if descargar_pdf:
-        # Obtener la fecha actual
         fecha_actual = datetime.now().strftime("%d/%m/%Y")
 
         pdf = FPDF()
@@ -566,17 +571,27 @@ def reportes():
 
         # Título del PDF
         pdf.set_font('Arial', 'B', 16)
+        pdf.set_text_color(255, 102, 102)  # Texto en rojo claro
         pdf.cell(200, 10, txt="Reporte de Productos en " + bodega, ln=True, align='C')
 
-        # Agregar la fecha al PDF
+        # Fecha de generación
         pdf.set_font('Arial', 'I', 12)
-        pdf.cell(200, 10, txt="Fecha del Reporte: " + fecha_actual, ln=True, align='C')
+        pdf.cell(200, 10, txt="Fecha de generación: " + fecha_actual, ln=True, align='C')
 
-        # Añadir productos al PDF
+        # Espaciado
+        pdf.ln(10)
+
+        # Encabezado de la tabla
+        pdf.set_fill_color(255, 204, 204)  # Fondo de encabezado en rojo claro
+        pdf.set_draw_color(255, 102, 102)  # Borde en rojo claro
+        pdf.cell(100, 10, 'Nombre del Producto', 1, 0, 'C', fill=True)
+        pdf.cell(50, 10, 'Cantidad', 1, 1, 'C', fill=True)
+
+        # Contenido de la tabla
         pdf.set_font('Arial', '', 12)
-        pdf.ln(10)  # Espacio adicional
         for producto in productos:
-            pdf.cell(200, 10, txt=f"Producto: {producto[0]} - Cantidad: {producto[1]} pz", ln=True)
+            pdf.cell(100, 10, producto[0], 1)
+            pdf.cell(50, 10, str(producto[1]), 1, 1)
 
         # Enviar el PDF como respuesta
         response = make_response(pdf.output(dest='S').encode('latin1'))
@@ -586,7 +601,6 @@ def reportes():
     
     return render_template('reportes.html', productos=productos, bodega=bodega)
 
-
 # ALMACENISTA
 @app.route('/base_almacenista')
 def base_almacenista():
@@ -595,6 +609,8 @@ def base_almacenista():
 @app.route('/productos2')
 def productos2():
     nombre = request.args.get('nombre')  # Obtener el nombre del parámetro de búsqueda
+    show_modal = request.args.get('show_modal')
+    
     conn = db.conectar()
     cursor = conn.cursor()
 
@@ -617,7 +633,7 @@ def productos2():
     cursor.close()
     db.desconectar(conn)
 
-    return render_template('productos2.html', datos=datos)
+    return render_template('productos2.html', datos=datos, show_modal=show_modal)
 
 @app.route('/editar_producto2/<int:id_producto>', methods=['GET', 'POST'])
 def editar_producto2(id_producto):
@@ -660,12 +676,12 @@ def editar_producto2(id_producto):
 
                 conn.commit()
                 flash('Producto actualizado correctamente')
-                return redirect(url_for('productos'))
+                return redirect(url_for('productos2'))
             
             except Exception as e:
                 print(f"Error al actualizar el producto: {e}")
                 flash('Error al actualizar el producto')
-                return redirect(url_for('productos'))
+                return redirect(url_for('productos2'))
         else:
             flash('Formulario no válido. Por favor, corrige los errores.')
             print("Formulario no válido.")
@@ -723,9 +739,9 @@ def insertar_producto2():
         presentacion = form.presentacion.data
         fk_marca = form.fk_marca.data
         fk_bodega = form.fk_bodega.data
-        fk_categoria=form.fk_categoria.data
+        fk_categoria = form.fk_categoria.data
 
-        print(f"Nombre: {nombre}, Cantidad: {cantidad}, Presentación: {presentacion}, Marca: {fk_marca}, Bodega: {fk_bodega}, Categoria: {fk_categoria} ")
+        print(f"Nombre: {nombre}, Cantidad: {cantidad}, Presentación: {presentacion}, Marca: {fk_marca}, Bodega: {fk_bodega}, Categoria: {fk_categoria}")
 
         conn = db.conectar()
         cursor = conn.cursor()
@@ -736,6 +752,7 @@ def insertar_producto2():
             ''', (nombre, cantidad, presentacion, fk_marca, fk_bodega, fk_categoria))
             conn.commit()
             flash('Producto añadido correctamente')
+            return redirect(url_for('productos2', show_modal='insert'))
         except Exception as e:
             conn.rollback()
             flash(f'Error al añadir el producto: {str(e)}')
@@ -743,9 +760,9 @@ def insertar_producto2():
             cursor.close()
             db.desconectar(conn)
 
-        return redirect(url_for('productos2'))
+        return redirect(url_for('productos2', show_modal='error'))
 
-    return render_template('insertar_producto.html', form=form)
+    return render_template('insertar_producto2.html', form=form)
 
 @app.route('/buscar_productos2', methods=['GET', 'POST'])
 def buscar_productos2():
@@ -836,7 +853,9 @@ def editar_bodega2():
 @app.route('/reportes2', methods=['GET', 'POST'])
 def reportes2():
     bodega = request.form.get('bodega')
+    descargar_pdf = request.form.get('descargar_pdf', False)
     productos = []
+
     conn = db.conectar()
     cursor = conn.cursor()
     
@@ -845,10 +864,46 @@ def reportes2():
         FROM productos
         WHERE fk_bodega = (SELECT id_bodega FROM bodega WHERE nombre = %s);
     ''', (bodega,))
-    
+
     productos = cursor.fetchall()
     cursor.close()
     conn.close()
+
+    if descargar_pdf:
+        fecha_actual = datetime.now().strftime("%d/%m/%Y")
+
+        pdf = FPDF()
+        pdf.add_page()
+
+        # Título del PDF
+        pdf.set_font('Arial', 'B', 16)
+        pdf.set_text_color(255, 102, 102)  # Texto en rojo claro
+        pdf.cell(200, 10, txt="Reporte de Productos en " + bodega, ln=True, align='C')
+
+        # Fecha de generación
+        pdf.set_font('Arial', 'I', 12)
+        pdf.cell(200, 10, txt="Fecha de generación: " + fecha_actual, ln=True, align='C')
+
+        # Espaciado
+        pdf.ln(10)
+
+        # Encabezado de la tabla
+        pdf.set_fill_color(255, 204, 204)  # Fondo de encabezado en rojo claro
+        pdf.set_draw_color(255, 102, 102)  # Borde en rojo claro
+        pdf.cell(100, 10, 'Nombre del Producto', 1, 0, 'C', fill=True)
+        pdf.cell(50, 10, 'Cantidad', 1, 1, 'C', fill=True)
+
+        # Contenido de la tabla
+        pdf.set_font('Arial', '', 12)
+        for producto in productos:
+            pdf.cell(100, 10, producto[0], 1)
+            pdf.cell(50, 10, str(producto[1]), 1, 1)
+
+        # Enviar el PDF como respuesta
+        response = make_response(pdf.output(dest='S').encode('latin1'))
+        response.headers['Content-Type'] = 'application/pdf'
+        response.headers['Content-Disposition'] = 'attachment; filename=reporte_productos.pdf'
+        return response
     
     return render_template('reportes2.html', productos=productos, bodega=bodega)
 

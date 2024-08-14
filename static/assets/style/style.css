@@ -37,7 +37,7 @@ body.general-body {
 
 body.general-body::before {
     content: "";
-    background: url('../sags_fondo.jpg') no-repeat center center fixed;
+    background: url('../sags_fondo_final.jpg') no-repeat center center fixed;
     background-size: cover;
     opacity: 0.2;
     position: fixed;
