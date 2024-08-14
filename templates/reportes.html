@@ -28,7 +28,6 @@
                 </select>
                 <button type="submit" class="btn btn-primary" style="margin-left: 10px;">Ver Reporte</button>
             </form>
-            
             <form action="{{ url_for('reportes') }}" method="post" style="display:inline;">
                 <input type="hidden" name="bodega" value="{{ bodega }}">
                 <input type="hidden" name="descargar_pdf" value="true">

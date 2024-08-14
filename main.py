@@ -1,9 +1,11 @@
 import psycopg2
 from psycopg2.extras import RealDictCursor
-from flask import Flask, request, redirect, render_template, url_for, flash, session, send_file
+from flask import Flask, request, redirect, render_template, url_for, flash, session, send_file, make_response
 from flask_bootstrap import Bootstrap
 from flask_wtf import FlaskForm
 from wtforms.fields import PasswordField, StringField, SubmitField
+from fpdf import FPDF
+from datetime import datetime 
 import db
 from forms import Sags1Form
 from forms import Sags2Form
@@ -28,7 +30,7 @@ def index():
     if 'tipo_usuario' not in session or session['tipo_usuario'] != 'Administrador':
         flash('Acceso denegado. Debes ser ADMINISTRADOR para acceder a esta página.')
         return redirect(url_for('login'))
-    return render_template('login.html')
+    return render_template('login2.html')
 
 import psycopg2
 from psycopg2.extras import RealDictCursor
@@ -539,7 +541,9 @@ def eliminar_bodega():
 @app.route('/reportes', methods=['GET', 'POST'])
 def reportes():
     bodega = request.form.get('bodega')
+    descargar_pdf = request.form.get('descargar_pdf', False)
     productos = []
+
     conn = db.conectar()
     cursor = conn.cursor()
     
@@ -548,10 +552,37 @@ def reportes():
         FROM productos
         WHERE fk_bodega = (SELECT id_bodega FROM bodega WHERE nombre = %s);
     ''', (bodega,))
-    
+
     productos = cursor.fetchall()
     cursor.close()
     conn.close()
+
+    if descargar_pdf:
+        # Obtener la fecha actual
+        fecha_actual = datetime.now().strftime("%d/%m/%Y")
+
+        pdf = FPDF()
+        pdf.add_page()
+
+        # Título del PDF
+        pdf.set_font('Arial', 'B', 16)
+        pdf.cell(200, 10, txt="Reporte de Productos en " + bodega, ln=True, align='C')
+
+        # Agregar la fecha al PDF
+        pdf.set_font('Arial', 'I', 12)
+        pdf.cell(200, 10, txt="Fecha del Reporte: " + fecha_actual, ln=True, align='C')
+
+        # Añadir productos al PDF
+        pdf.set_font('Arial', '', 12)
+        pdf.ln(10)  # Espacio adicional
+        for producto in productos:
+            pdf.cell(200, 10, txt=f"Producto: {producto[0]} - Cantidad: {producto[1]} pz", ln=True)
+
+        # Enviar el PDF como respuesta
+        response = make_response(pdf.output(dest='S').encode('latin1'))
+        response.headers['Content-Type'] = 'application/pdf'
+        response.headers['Content-Disposition'] = 'attachment; filename=reporte_productos.pdf'
+        return response
     
     return render_template('reportes.html', productos=productos, bodega=bodega)
 
