@@ -1,4 +1,5 @@
 {% extends 'bootstrap/base.html' %}
+
 {% block head %}
     {{ super() }}
     <title>
@@ -7,6 +8,7 @@
         {% endblock %}
     </title>
     <link rel="stylesheet" href="../static/assets/style/style.css">
+    <link rel="stylesheet" href="../static/assets/style/ventana.css">
 {% endblock %}
 
 {% block body %}
@@ -17,18 +19,56 @@
 
     {% block content %}
     <div class="container-md text-center mt-5">
-        <img src="../static/assets/sags.jpg" alt="Logo">
+        <img src="../static/assets/sags_final.jpg" alt="Logo">
         <h1 class="mt-4">Bienvenido a Tienda SAGS</h1>
         <p class="lead">Su tienda de confianza para los mejores productos.</p>
     </div>
     {% endblock %}
 
+    <!-- Modal para inicio de sesión -->
+    <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="loginModalLabel">Inicio de Sesión</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form action="{{ url_for('login') }}" method="post">
+                        <div class="mb-3">
+                            <label for="username" class="form-label">Usuario</label>
+                            <input type="email" name="username" id="username" class="form-control" placeholder="Usuario" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Contraseña</label>
+                            <input type="password" name="password" id="password" class="form-control" placeholder="Contraseña" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Iniciar Sesión</button>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts necesarios para el modal -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Código para abrir el modal cuando se carga la página
+        $(document).ready(function() {
+            $('#loginModal').modal('show');
+        });
+    </script>
 </body>
+
 {% block footer %}
     <footer class="footer mt-auto py-3">
         <div class="container-fluid text-center">
             <span class="text-light">VRAM© 2024 TODOS LOS DERECHOS RESERVADOS</span>
         </div>
     </footer>
-    {% endblock %}
+{% endblock %}
 {% endblock %}

@@ -5,7 +5,7 @@ from flask_bootstrap import Bootstrap
 from flask_wtf import FlaskForm
 from wtforms.fields import PasswordField, StringField, SubmitField
 from fpdf import FPDF
-from datetime import datetime 
+from datetime import datetime
 import db
 from forms import Sags1Form
 from forms import Sags2Form
@@ -38,6 +38,7 @@ from psycopg2.extras import RealDictCursor
 # Ruta para el endpoint 'login_view'
 @app.route('/login')
 def login_view():
+    session['show_modal'] = True
     return render_template('login2.html')
 
 @app.route('/acceso-login', methods=["GET", "POST"])
@@ -51,7 +52,7 @@ def login():
         cuenta = None
 
         try:
-            conn = db.conectar()  # Conexión a la base de datos usando tu método
+            conn = db.conectar()
             cursor = conn.cursor(cursor_factory=RealDictCursor)
             cursor.execute('''
                 SELECT * FROM usuarios WHERE correo = %s AND contrasena = %s
@@ -70,15 +71,17 @@ def login():
         if cuenta:
             if cuenta['tipo_usuario'] == 'Administrador':
                 session['tipo_usuario'] = 'Administrador'
+                session['show_modal'] = False
                 return redirect(url_for('base'))
             elif cuenta['tipo_usuario'] == 'Almacenista':
                 session['tipo_usuario'] = 'Almacenista'
+                session['show_modal'] = False
                 return redirect(url_for('base_almacenista'))
-            else:
-                return redirect(url_for('login_view'))
         else:
             return redirect(url_for('login_view'))
     return render_template('login2.html')
+
+
 
 @app.route('/admin')
 def admin():
