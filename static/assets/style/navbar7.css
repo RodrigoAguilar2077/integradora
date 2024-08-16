@@ -94,7 +94,7 @@ li a.contact:hover {
     text-align: center;
     transition: all 0.5s;
     right: -100%;
-    background: #0000003d;
+    background: #00000071;
     z-index: 1000;
   }
 
@@ -107,6 +107,7 @@ li a.contact:hover {
   }
 
   .navlinks li a:hover {
+    color: #f9a6a6;
     border-bottom: none;
   }
 
